@@ -9,6 +9,7 @@ import javax.security.auth.login.LoginException;
 public class Ichi {
     public static JDA botCore;
     public static Listener listener;
+    public static DiscordServerConfig servers;
     
     public static void main(String[] s){
         listener=new Listener();
