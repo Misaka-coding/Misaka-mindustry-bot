@@ -8,6 +8,13 @@ import javax.security.auth.login.LoginException;
 
 public class Ichi {
     public static JDA botCore;
+    public static Listener listener;
+    
+    public static void main(String[] s){
+        listener=new Listener();
+        botCore=runBot(s[0]);
+    }
+    
     public static JDA runBot(String token) throws LoginException {
             JDABuilder builder = new JDABuilder(AccountType.BOT);
             builder.setToken(token); //
