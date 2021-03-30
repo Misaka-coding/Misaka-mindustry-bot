@@ -4,6 +4,8 @@ import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.internal.entities.EntityBuilder;
 
+import com.google.gson.*;
+
 import javax.security.auth.login.LoginException;
 
 public class Ichi {
