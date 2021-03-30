@@ -12,6 +12,9 @@ public class Ichi {
     public static JDA botCore;
     public static Listener listener;
     public static Gson gson = new Gson();
+    public static ContentParser parser = new ContentParser();
+
+    public static Long botBaseServer =  826523297671938078L;
 
     public static void main(String[] s) throws LoginException {
         listener=new Listener();

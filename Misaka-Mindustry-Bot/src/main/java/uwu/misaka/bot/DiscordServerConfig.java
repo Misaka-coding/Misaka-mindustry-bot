@@ -16,6 +16,7 @@ public class DiscordServerConfig {
 
     public DiscordServerConfig(Long id){
         this.id=id;
+        servers.add(this);
     }
 
     public static void load() throws IOException {
@@ -50,5 +51,11 @@ public class DiscordServerConfig {
     }
     public String toJson(){
         return gson.toJson(DiscordServerConfig.class);
+    }
+    public static DiscordServerConfig get(Long id){
+        for(DiscordServerConfig c:servers){
+            if(c.id==id){return c;}
+        }
+        return new DiscordServerConfig(id);
     }
 }
