@@ -13,7 +13,7 @@ public class Ichi {
     public static Listener listener;
     public static Gson gson = new Gson();
 
-    public static void main(String[] s){
+    public static void main(String[] s) throws LoginException {
         listener=new Listener();
         botCore=runBot(s[0]);
     }

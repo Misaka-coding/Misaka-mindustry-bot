@@ -1,5 +1,10 @@
 package uwu.misaka.bot;
 
+import java.io.*;
+import java.util.ArrayList;
+
+import static uwu.misaka.bot.Ichi.gson;
+
 public class DiscordServerConfig {
     public long id;
     public long botChannel=0;
@@ -7,15 +12,15 @@ public class DiscordServerConfig {
     public long mapsChannel=0;
     public long modsChannel=0;
 
-    public static DiscordServerConfig servers;
+    public static ArrayList<DiscordServerConfig> servers;
 
     public DiscordServerConfig(Long id){
         this.id=id;
     }
 
-    public static void load(){
+    public static void load() throws IOException {
       File storage=new File("Storage.txt");
-      if(Storage.exists()){
+      if(storage.exists()){
         storage.createNewFile();
       }
       BufferedReader r = new BufferedReader(new FileReader(storage));
@@ -28,7 +33,22 @@ public class DiscordServerConfig {
         }
       }
     }
+    public static void save() throws IOException {
+        File storage=new File("Storage.txt");
+        if(storage.exists()){
+            storage.createNewFile();
+        }
+        FileWriter w = new FileWriter(storage,false);
+        for(DiscordServerConfig c:servers){
+            w.append(c.toJson());
+        }
+        w.flush();
+    }
+
     public static DiscordServerConfig fromJson(String s){
-        return Ichi.gson.fromJson(s,DiscordServerConfig.class);
+        return gson.fromJson(s,DiscordServerConfig.class);
+    }
+    public String toJson(){
+        return gson.toJson(DiscordServerConfig.class);
     }
 }
