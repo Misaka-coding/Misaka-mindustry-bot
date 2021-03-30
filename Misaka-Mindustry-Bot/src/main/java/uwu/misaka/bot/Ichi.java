@@ -9,8 +9,8 @@ import javax.security.auth.login.LoginException;
 public class Ichi {
     public static JDA botCore;
     public static Listener listener;
-    public static DiscordServerConfig servers;
-    
+    public static Gson gson = new Gson();
+
     public static void main(String[] s){
         listener=new Listener();
         botCore=runBot(s[0]);
