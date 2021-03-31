@@ -13,6 +13,6 @@ public class Listener extends ListenerAdapter {
         User author = message.getAuthor();
         if (author.isBot()){ return;}
         System.out.println("Получено сообщение");
-        //BHandler.handleMsg(message);
+        Handler.handle(message);
     }
 }

@@ -12,7 +12,7 @@ public class DiscordServerConfig {
     public long mapsChannel=0;
     public long modsChannel=0;
 
-    public static ArrayList<DiscordServerConfig> servers;
+    public static ArrayList<DiscordServerConfig> servers = new ArrayList<>();
 
     public DiscordServerConfig(Long id){
         this.id=id;
@@ -34,7 +34,8 @@ public class DiscordServerConfig {
         }
       }
     }
-    public static void save() throws IOException {
+    public static void save(){
+        try{
         File storage=new File("Storage.txt");
         if(storage.exists()){
             storage.createNewFile();
@@ -43,7 +44,9 @@ public class DiscordServerConfig {
         for(DiscordServerConfig c:servers){
             w.append(c.toJson());
         }
-        w.flush();
+        w.flush();} catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static DiscordServerConfig fromJson(String s){

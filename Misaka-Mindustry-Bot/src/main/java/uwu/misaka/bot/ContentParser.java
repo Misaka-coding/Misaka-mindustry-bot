@@ -67,7 +67,7 @@ public class ContentParser {
             }
         }
 
-        String assets = "bot/";
+        String assets = "";
         Vars.state = new GameState();
 
         TextureAtlas.TextureAtlasData data = new TextureAtlas.TextureAtlasData(new Fi(assets + "sprites/sprites.atlas"), new Fi(assets + "sprites"), false);
@@ -146,7 +146,7 @@ public class ContentParser {
         }
 
         try{
-            BufferedImage image = ImageIO.read(new File("bot/sprites/block_colors.png"));
+            BufferedImage image = ImageIO.read(new File("sprites/block_colors.png"));
 
             for(Block block : Vars.content.blocks()){
                 block.mapColor.argb8888(image.getRGB(block.id, 0));
