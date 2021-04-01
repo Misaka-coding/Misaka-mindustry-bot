@@ -13,6 +13,7 @@ import arc.struct.Seq;
 import arc.struct.StringMap;
 import arc.util.io.CounterInputStream;
 import arc.util.serialization.Base64Coder;
+import arc.util.serialization.Json;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.core.ContentLoader;
@@ -49,7 +50,6 @@ import static mindustry.Vars.content;
 import static mindustry.Vars.world;
 
 public class ContentParser {
-
     Graphics2D currentGraphics;
     Color co=new Color();
     BufferedImage currentImage;
@@ -70,7 +70,7 @@ public class ContentParser {
         String assets = "";
         Vars.state = new GameState();
 
-        TextureAtlas.TextureAtlasData data = new TextureAtlas.TextureAtlasData(new Fi(assets + "sprites/sprites.atlas"), new Fi(assets + "sprites"), false);
+        TextureAtlas.TextureAtlasData data = new TextureAtlas.TextureAtlasData(new Fi("sprites/sprites.atlas"), new Fi("sprites"), false);
         Core.atlas = new TextureAtlas();
 
         ObjectMap<TextureAtlas.TextureAtlasData.AtlasPage, BufferedImage> images = new ObjectMap<>();

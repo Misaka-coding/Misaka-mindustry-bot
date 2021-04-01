@@ -21,7 +21,7 @@ public class DiscordServerConfig {
 
     public static void load() throws IOException {
       File storage=new File("Storage.txt");
-      if(storage.exists()){
+      if(!storage.exists()){
         storage.createNewFile();
       }
       BufferedReader r = new BufferedReader(new FileReader(storage));
