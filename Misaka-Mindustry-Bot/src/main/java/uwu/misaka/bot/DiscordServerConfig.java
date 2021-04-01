@@ -22,7 +22,9 @@ public class DiscordServerConfig {
     public static void load() throws IOException {
         File storage = new File("Storage.txt");
         if (!storage.exists()) {
-            storage.createNewFile();
+            if (!storage.createNewFile()) {
+                return;
+            }
         }
         BufferedReader r = new BufferedReader(new FileReader(storage));
         while (true) {
@@ -38,11 +40,13 @@ public class DiscordServerConfig {
         try{
         File storage=new File("Storage.txt");
         if(storage.exists()){
-            storage.createNewFile();
+            if (!storage.createNewFile()) {
+                return;
+            }
         }
         FileWriter w = new FileWriter(storage,false);
         for(DiscordServerConfig c:Ichi.servers){
-            w.append(c.toJson() + "\n");
+            w.append(c.toJson()).append("\n");
         }
         w.flush();} catch (IOException e) {
             e.printStackTrace();

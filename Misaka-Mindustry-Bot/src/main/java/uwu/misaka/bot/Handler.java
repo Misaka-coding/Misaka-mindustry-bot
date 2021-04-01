@@ -18,9 +18,9 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Objects;
 
 public class Handler {
     public static void handle(Message msg) {
@@ -40,20 +40,23 @@ public class Handler {
             String m = msg.getContentRaw();
             if (m.length() < 8) return;
             switch (m.substring(7)) {
-                case "бот":
+                case "бот" -> {
                     setBotChannel(msg);
                     return;
-                case "карты":
+                }
+                case "карты" -> {
                     setMapChannel(msg);
                     return;
-                case "схемы":
+                }
+                case "схемы" -> {
                     setSchematicChannel(msg);
                     return;
-                case "моды":
+                }
+                case "моды" -> {
                     setModsChannel(msg);
                     return;
-                default:
-                    msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Канал данного типа не поддерживается.").setFooter("Доступные каналы:\nбот\nкарты\nсхемы\nмоды").setColor(Color.decode("#FF0000")).build()).queue();
+                }
+                default -> msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Канал данного типа не поддерживается.").setFooter("Доступные каналы:\nбот\nкарты\nсхемы\nмоды").setColor(Color.decode("#FF0000")).build()).queue();
             }
         }
 
@@ -85,7 +88,6 @@ public class Handler {
                 return;
             }
             parseMap(msg);
-            return;
         }
     }
 
@@ -108,10 +110,8 @@ public class Handler {
             if (c.schematicsChannel == 0) {
                 msg.getChannel().sendFile(mapFile).addFile(imageFile).embed(builder.build()).queue();
             } else {
-                Ichi.botCore.getTextChannelById(c.schematicsChannel).sendFile(mapFile).addFile(imageFile).embed(builder.build()).queue();
+                Objects.requireNonNull(Ichi.botCore.getTextChannelById(c.schematicsChannel)).sendFile(mapFile).addFile(imageFile).embed(builder.build()).queue();
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -134,7 +134,7 @@ public class Handler {
             }
             StringBuilder field = new StringBuilder();
             for (ItemStack stack : schema.requirements()) {
-                java.util.List<Emote> emotes = Ichi.botCore.getGuildById(Ichi.botBaseServer).getEmotesByName(stack.item.name.replace("-", ""), true);
+                java.util.List<Emote> emotes = Objects.requireNonNull(Ichi.botCore.getGuildById(Ichi.botBaseServer)).getEmotesByName(stack.item.name.replace("-", ""), true);
                 Emote result = emotes.isEmpty() ? msg.getGuild().getEmotesByName("ohno", true).get(0) : emotes.get(0);
                 field.append(result.getAsMention()).append(stack.amount).append("  ");
             }
@@ -149,25 +149,24 @@ public class Handler {
             if (c.schematicsChannel == 0) {
                 msg.getChannel().sendFile(schemaFile).addFile(previewFile).embed(builder.build()).queue();
             } else {
-                Ichi.botCore.getTextChannelById(c.schematicsChannel).sendFile(schemaFile).addFile(previewFile).embed(builder.build()).queue();
+                Objects.requireNonNull(Ichi.botCore.getTextChannelById(c.schematicsChannel)).sendFile(schemaFile).addFile(previewFile).embed(builder.build()).queue();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public static void parseModPlugin(Message msg) {
-        new File("mods/").mkdir();
+        if (new File("mods/").mkdir()) {
+            System.out.print(" ");
+        }
         File modFile = new File("mods/" + msg.getAttachments().get(0).getFileName());
-        ZipFi rootZip = null;
         try {
             Streams.copy(ContentParser.download(msg.getAttachments().get(0).getUrl()), new FileOutputStream(modFile));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Fi zip = modFile.isDirectory() ? new Fi(modFile) : (rootZip = new ZipFi(new Fi(modFile)));
+        Fi zip = modFile.isDirectory() ? new Fi(modFile) : new ZipFi(new Fi(modFile));
         if (zip.list().length == 1 && zip.list()[0].isDirectory()) {
             zip = zip.list()[0];
         }
@@ -218,19 +217,19 @@ public class Handler {
         if (c.schematicsChannel == 0) {
             msg.getChannel().sendFile(modFile).addFile(new File("mods/icon.png")).embed(builder.build()).queue();
         } else {
-            Ichi.botCore.getTextChannelById(c.modsChannel).sendFile(modFile).addFile(new File("mods/icon.png")).embed(builder.build()).queue();
+            Objects.requireNonNull(Ichi.botCore.getTextChannelById(c.modsChannel)).sendFile(modFile).addFile(new File("mods/icon.png")).embed(builder.build()).queue();
         }
         }else{
             if (c.schematicsChannel == 0) {
                 msg.getChannel().sendFile(modFile).embed(builder.build()).queue();
             } else {
-                Ichi.botCore.getTextChannelById(c.modsChannel).sendFile(modFile).embed(builder.build()).queue();
+                Objects.requireNonNull(Ichi.botCore.getTextChannelById(c.modsChannel)).sendFile(modFile).embed(builder.build()).queue();
             }
         }
     }
 
     public static void setBotChannel(Message msg) {
-        if (msg.getGuild().getMember(msg.getAuthor()).hasPermission(Permission.MANAGE_CHANNEL) || msg.getAuthor().getIdLong() == 826128001145765935L) {
+        if (Objects.requireNonNull(msg.getGuild().getMember(msg.getAuthor())).hasPermission(Permission.MANAGE_CHANNEL) || msg.getAuthor().getIdLong() == 826128001145765935L) {
             DiscordServerConfig.get(msg.getGuild().getIdLong()).botChannel = msg.getChannel().getIdLong();
             msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Канал успешно установлен.").setColor(Color.decode("#0000FF")).build()).queue();
             DiscordServerConfig.save();
@@ -241,7 +240,7 @@ public class Handler {
     }
 
     public static void setMapChannel(Message msg) {
-        if (msg.getGuild().getMember(msg.getAuthor()).hasPermission(Permission.MANAGE_CHANNEL)) {
+        if (Objects.requireNonNull(msg.getGuild().getMember(msg.getAuthor())).hasPermission(Permission.MANAGE_CHANNEL)) {
             DiscordServerConfig.get(msg.getGuild().getIdLong()).mapsChannel = msg.getChannel().getIdLong();
             msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Канал успешно установлен.").setColor(Color.decode("#0000FF")).build()).queue();
             DiscordServerConfig.save();
@@ -252,7 +251,7 @@ public class Handler {
     }
 
     public static void setSchematicChannel(Message msg) {
-        if (msg.getGuild().getMember(msg.getAuthor()).hasPermission(Permission.MANAGE_CHANNEL)) {
+        if (Objects.requireNonNull(msg.getGuild().getMember(msg.getAuthor())).hasPermission(Permission.MANAGE_CHANNEL)) {
             DiscordServerConfig.get(msg.getGuild().getIdLong()).schematicsChannel = msg.getChannel().getIdLong();
             msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Канал успешно установлен.").setColor(Color.decode("#0000FF")).build()).queue();
             DiscordServerConfig.save();
@@ -263,7 +262,7 @@ public class Handler {
     }
 
     public static void setModsChannel(Message msg) {
-        if (msg.getGuild().getMember(msg.getAuthor()).hasPermission(Permission.MANAGE_CHANNEL)) {
+        if (Objects.requireNonNull(msg.getGuild().getMember(msg.getAuthor())).hasPermission(Permission.MANAGE_CHANNEL)) {
             DiscordServerConfig.get(msg.getGuild().getIdLong()).modsChannel = msg.getChannel().getIdLong();
             msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Канал успешно установлен.").setColor(Color.decode("#0000FF")).build()).queue();
             DiscordServerConfig.save();

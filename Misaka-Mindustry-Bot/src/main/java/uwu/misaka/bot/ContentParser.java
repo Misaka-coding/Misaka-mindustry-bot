@@ -12,8 +12,6 @@ import arc.struct.ObjectMap;
 import arc.struct.Seq;
 import arc.struct.StringMap;
 import arc.util.io.CounterInputStream;
-import arc.util.serialization.Base64Coder;
-import arc.util.serialization.Json;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.core.ContentLoader;
@@ -22,7 +20,6 @@ import mindustry.core.Version;
 import mindustry.core.World;
 import mindustry.ctype.Content;
 import mindustry.ctype.ContentType;
-
 import mindustry.entities.units.BuildPlan;
 import mindustry.game.Schematic;
 import mindustry.game.Schematics;
@@ -36,12 +33,14 @@ import mindustry.world.Tile;
 import mindustry.world.WorldContext;
 import mindustry.world.blocks.environment.OreBlock;
 
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.zip.InflaterInputStream;
@@ -67,7 +66,6 @@ public class ContentParser {
             }
         }
 
-        String assets = "";
         Vars.state = new GameState();
 
         TextureAtlas.TextureAtlasData data = new TextureAtlas.TextureAtlasData(new Fi("sprites/sprites.atlas"), new Fi("sprites"), false);
@@ -192,11 +190,11 @@ public class ContentParser {
         requests.each(req -> {
             req.animScale = 1f;
             req.worldContext = false;
-            req.block.drawRequestRegion(req, requests::each);
+            req.block.drawRequestRegion(req, requests);
             Draw.reset();
         });
 
-        requests.each(req -> req.block.drawRequestConfigTop(req, requests::each));
+        requests.each(req -> req.block.drawRequestConfigTop(req, requests));
         ImageIO.write(image, "png", new File("out.png"));
 
         return image;
@@ -386,11 +384,8 @@ public class ContentParser {
     }
     public static InputStream download(String url){
         try{
-            System.out.print("***");
             HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
             connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36");
-            InputStream strm=connection.getInputStream();
-            System.out.println("#");
             return connection.getInputStream();
         }catch(Exception e){
             throw new RuntimeException(e);
