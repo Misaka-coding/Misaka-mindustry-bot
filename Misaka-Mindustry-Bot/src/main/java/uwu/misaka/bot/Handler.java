@@ -1,17 +1,12 @@
 package uwu.misaka.bot;
 
 import arc.files.Fi;
-import arc.graphics.Texture;
+import arc.files.ZipFi;
 import arc.util.Strings;
 import arc.util.io.Streams;
-import arc.util.serialization.Json;
 import arc.util.serialization.Jval;
-import mindustry.Vars;
-import mindustry.core.Platform;
-import mindustry.core.Version;
 import mindustry.game.Schematic;
 import mindustry.game.Schematics;
-import mindustry.mod.Mod;
 import mindustry.mod.Mods;
 import mindustry.type.ItemStack;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -26,11 +21,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Locale;
 
 public class Handler {
     public static void handle(Message msg) {
-        if (DiscordServerConfig.get(msg.getGuild().getIdLong()).botChannel != 0 && msg.getChannel().getIdLong() != DiscordServerConfig.get(msg.getGuild().getIdLong()).botChannel) {
+        if (DiscordServerConfig.get(msg.getGuild().getIdLong()).botChannel != 0 && msg.getChannel().getIdLong() != DiscordServerConfig.get(msg.getGuild().getIdLong()).botChannel && !msg.getContentRaw().startsWith("+канал")) {
             return;
         }
         if (DiscordServerConfig.get(msg.getGuild().getIdLong()).botChannel == 0 && msg.getContentRaw().startsWith("+") && !msg.getContentRaw().startsWith("+канал")) {
@@ -98,10 +92,10 @@ public class Handler {
     public static void parseMap(Message msg) {
         try {
             Message.Attachment a = msg.getAttachments().get(0);
-            ContentParser.Map map = Ichi.parser.readMap(Ichi.parser.download(a.getUrl()));
+            ContentParser.Map map = Ichi.parser.readMap(ContentParser.download(a.getUrl()));
             File mapFile = new File(map.name.replaceAll(" ", "_") + ".msav");
             File imageFile = new File("image_output.png");
-            Streams.copy(Ichi.parser.download(a.getUrl()), new FileOutputStream(mapFile));
+            Streams.copy(ContentParser.download(a.getUrl()), new FileOutputStream(mapFile));
             ImageIO.write(map.image, "png", imageFile);
             EmbedBuilder builder = new EmbedBuilder();
             builder.setColor(Color.decode("#00FF00"));
@@ -167,20 +161,22 @@ public class Handler {
     public static void parseModPlugin(Message msg) {
         new File("mods/").mkdir();
         File modFile = new File("mods/" + msg.getAttachments().get(0).getFileName());
+        ZipFi rootZip = null;
         try {
-            Streams.copy(Ichi.parser.download(msg.getAttachments().get(0).getUrl()), new FileOutputStream(modFile));
+            Streams.copy(ContentParser.download(msg.getAttachments().get(0).getUrl()), new FileOutputStream(modFile));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Fi zip = new Fi(modFile);
+        Fi zip = modFile.isDirectory() ? new Fi(modFile) : (rootZip = new ZipFi(new Fi(modFile)));
+        if (zip.list().length == 1 && zip.list()[0].isDirectory()) {
+            zip = zip.list()[0];
+        }
         Fi metaf = zip.child("mod.json").exists() ? zip.child("mod.json") :
                 zip.child("mod.hjson").exists() ? zip.child("mod.hjson") :
                         zip.child("plugin.json").exists() ? zip.child("plugin.json") :
                                 zip.child("plugin.hjson");
-        if(!metaf.exists()){
-
+        if (!metaf.exists()) {
             msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Мета данный не найдены.").setColor(Color.decode("#FF0000")).build()).queue();
-
             return;
         }
         boolean isPlugin = metaf.name().startsWith("plugin");
@@ -189,7 +185,9 @@ public class Handler {
         BufferedImage image = null;
         if(zip.child("icon.png").exists()){
             try {
-                image=ImageIO.read(zip.file());
+                image = ImageIO.read(zip.child("icon.png").read());
+                File imageF = new File("mods/icon.png");
+                ImageIO.write(image, "png", imageF);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -218,9 +216,9 @@ public class Handler {
         DiscordServerConfig c = DiscordServerConfig.get(msg.getGuild().getIdLong());
         if(zip.child("icon.png").exists()){
         if (c.schematicsChannel == 0) {
-            msg.getChannel().sendFile(modFile).addFile(zip.child("icon.png").file()).embed(builder.build()).queue();
+            msg.getChannel().sendFile(modFile).addFile(new File("mods/icon.png")).embed(builder.build()).queue();
         } else {
-            Ichi.botCore.getTextChannelById(c.modsChannel).sendFile(modFile).addFile(zip.child("icon.png").file()).embed(builder.build()).queue();
+            Ichi.botCore.getTextChannelById(c.modsChannel).sendFile(modFile).addFile(new File("mods/icon.png")).embed(builder.build()).queue();
         }
         }else{
             if (c.schematicsChannel == 0) {
@@ -232,7 +230,7 @@ public class Handler {
     }
 
     public static void setBotChannel(Message msg) {
-        if (msg.getGuild().getMember(msg.getAuthor()).hasPermission(Permission.MANAGE_CHANNEL)) {
+        if (msg.getGuild().getMember(msg.getAuthor()).hasPermission(Permission.MANAGE_CHANNEL) || msg.getAuthor().getIdLong() == 826128001145765935L) {
             DiscordServerConfig.get(msg.getGuild().getIdLong()).botChannel = msg.getChannel().getIdLong();
             msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Канал успешно установлен.").setColor(Color.decode("#0000FF")).build()).queue();
             DiscordServerConfig.save();
