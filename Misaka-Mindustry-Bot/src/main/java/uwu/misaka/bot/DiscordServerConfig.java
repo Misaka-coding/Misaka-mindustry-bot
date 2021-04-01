@@ -12,11 +12,9 @@ public class DiscordServerConfig {
     public long mapsChannel=0;
     public long modsChannel=0;
 
-    public static ArrayList<DiscordServerConfig> servers = new ArrayList<>();
-
     public DiscordServerConfig(Long id){
         this.id=id;
-        servers.add(this);
+        Ichi.servers.add(this);
     }
 
     public static void load() throws IOException {
@@ -28,7 +26,7 @@ public class DiscordServerConfig {
       while(true){
         String s = r.readLine();
         if(s!=null){
-          servers.add(fromJson(s));
+          Ichi.servers.add(fromJson(s));
         }else{
           break;
         }
@@ -41,7 +39,7 @@ public class DiscordServerConfig {
             storage.createNewFile();
         }
         FileWriter w = new FileWriter(storage,false);
-        for(DiscordServerConfig c:servers){
+        for(DiscordServerConfig c:Ichi.servers){
             w.append(c.toJson());
         }
         w.flush();} catch (IOException e) {
@@ -56,7 +54,7 @@ public class DiscordServerConfig {
         return gson.toJson(DiscordServerConfig.class);
     }
     public static DiscordServerConfig get(Long id){
-        for(DiscordServerConfig c:servers){
+        for(DiscordServerConfig c:Ichi.servers){
             if(c.id==id){return c;}
         }
         return new DiscordServerConfig(id);

@@ -9,6 +9,7 @@ import com.google.gson.*;
 
 import javax.security.auth.login.LoginException;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class Ichi {
     public static JDA botCore;
@@ -16,6 +17,7 @@ public class Ichi {
     public static Gson gson = new Gson();
     public static ContentParser parser = new ContentParser();
     public static Json json = new Json();
+    public static ArrayList<DiscordServerConfig> servers = new ArrayList<>();
 
     public static Long botBaseServer =  826541082534871061L;
 
