@@ -24,18 +24,6 @@ import java.util.Objects;
 
 public class Handler {
     public static void handle(Message msg) {
-        if (DiscordServerConfig.get(msg.getGuild().getIdLong()).botChannel != 0 && msg.getChannel().getIdLong() != DiscordServerConfig.get(msg.getGuild().getIdLong()).botChannel && !msg.getContentRaw().startsWith("+канал")) {
-            return;
-        }
-        if (DiscordServerConfig.get(msg.getGuild().getIdLong()).botChannel == 0 && msg.getContentRaw().startsWith("+") && !msg.getContentRaw().startsWith("+канал")) {
-            msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Бот канал не установлен.").setFooter("Установите его с помощью команды +канал\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды").setColor(Color.decode("#FF0000")).build()).queue();
-            return;
-        }
-        if (msg.getContentRaw().equalsIgnoreCase("+помощь")) {
-
-            return;
-        }
-
         if (msg.getContentRaw().startsWith("+канал ")) {
             String m = msg.getContentRaw();
             if (m.length() < 8) return;
@@ -58,6 +46,26 @@ public class Handler {
                 }
                 default -> msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Канал данного типа не поддерживается.").setFooter("Доступные каналы:\nбот\nкарты\nсхемы\nмоды").setColor(Color.decode("#FF0000")).build()).queue();
             }
+        }
+        
+        if (DiscordServerConfig.get(msg.getGuild().getIdLong()).botChannel != 0 && msg.getChannel().getIdLong() != DiscordServerConfig.get(msg.getGuild().getIdLong()).botChannel) {
+            return;
+        }
+        if (DiscordServerConfig.get(msg.getGuild().getIdLong()).botChannel == 0 && msg.getContentRaw().startsWith("+")) {
+            msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Бот канал не установлен.").setFooter("Установите его с помощью команды +канал\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды").setColor(Color.decode("#FF0000")).build()).queue();
+            return;
+        }
+        if (msg.getContentRaw().equalsIgnoreCase("+помощь")||msg.getContentRaw().equalsIgnoreCase("+памагити")||msg.getContentRaw().equalsIgnoreCase("+хелп")||msg.getContentRaw().equalsIgnoreCase("+help")) {
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+            embedBuilder.setTitle("ПОМОЩЬ");
+            embedBuilder.setColor(Color.decode("#00FF00"));
+            embedBuilder.addField("+канал <тип канала>","установка каналов для контента. если канал не установлен, вывод в бот канал\nДоступно для: \nРоль с правами на управление каналами\nАдминистраторы бота(только бот канал)",false);
+            embedBuilder.addField("+помощь","помощь",false);
+            embedBuilder.addField("Преобразование контента","Моды, плагины, карты, схемы преобразуются при отправке их в бот канал. Если канал типа контента существует, отправка туда, инначе в бот канал",false);
+            embedBuilder.addField("+аватар <упоменание/айди>","Совлерские фокусы с аватарками | не работает",false);
+            embedBuilder.addField("+хентай","Совлерские фокусы с хентаем | Только для администраторов сервера и администраторов бота | только в каналах с меткой nsfw | не работает",false);
+            msg.getChannel().sendMessage(embedBuilder.build());
+            return;
         }
 
         if (msg.getAttachments().size() != 1) {

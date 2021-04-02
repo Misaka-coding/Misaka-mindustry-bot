@@ -31,7 +31,7 @@ public class Ichi {
             JDABuilder builder = new JDABuilder();
             builder.setToken(token);
             System.out.println("Token");
-            builder.setActivity(EntityBuilder.createActivity("+помощь", null, Activity.ActivityType.CUSTOM_STATUS));
+            builder.setActivity(EntityBuilder.createActivity("+помощь", null, Activity.ActivityType.DEFAULT));
             System.out.println("Table");
             builder.addEventListeners(new Listener());
             System.out.println("Listener");
