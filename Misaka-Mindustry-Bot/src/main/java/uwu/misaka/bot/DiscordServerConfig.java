@@ -39,7 +39,7 @@ public class DiscordServerConfig {
     public static void save(){
         try{
         File storage=new File("Storage.txt");
-        if(storage.exists()){
+        if (!storage.exists()) {
             if (!storage.createNewFile()) {
                 return;
             }
