@@ -62,10 +62,22 @@ public class Handler {
             embedBuilder.addField("+канал <тип канала>","установка каналов для контента. если канал не установлен, вывод в бот канал\nДоступно для: \nРоль с правами на управление каналами\nАдминистраторы бота(только бот канал)",false);
             embedBuilder.addField("+помощь","помощь",false);
             embedBuilder.addField("Преобразование контента","Моды, плагины, карты, схемы преобразуются при отправке их в бот канал. Если канал типа контента существует, отправка туда, инначе в бот канал",false);
-            embedBuilder.addField("+аватар <упоменание/айди>","Совлерские фокусы с аватарками | не работает",false);
+            embedBuilder.addField("+аватар <упоменание/айди>","Совлерские фокусы с аватарками",false);
             embedBuilder.addField("+хентай","Совлерские фокусы с хентаем | Только для администраторов сервера и администраторов бота | только в каналах с меткой nsfw | не работает",false);
             msg.getChannel().sendMessage(embedBuilder.build()).queue();
             return;
+        }
+        if(msg.getContentRaw().equalsIgnoreCase("+ава")){
+            if(msg.getMentions().size()>0){
+                msg.getChannel().sendMessage(Ichi.botCore.getUserById(msg.getMentions().get(0).getIdLong()).getAvatarUrl()).queue();
+                return;
+            }else{
+                if(msg.getContentRaw().length()>5){
+                msg.getChannel().sendMessage(Ichi.botCore.getUserById(msg.getContentRaw().substring(5)).getAvatarUrl()).queue();
+                return;
+                }
+            }
+            msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Участник не найден.").setColor(Color.decode("#FF0000")).build()).queue();
         }
 
         if (msg.getAttachments().size() != 1) {
@@ -183,7 +195,7 @@ public class Handler {
                         zip.child("plugin.json").exists() ? zip.child("plugin.json") :
                                 zip.child("plugin.hjson");
         if (!metaf.exists()) {
-            msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Мета данный не найдены.").setColor(Color.decode("#FF0000")).build()).queue();
+            msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Мета данные не найдены.").setColor(Color.decode("#FF0000")).build()).queue();
             return;
         }
         boolean isPlugin = metaf.name().startsWith("plugin");
