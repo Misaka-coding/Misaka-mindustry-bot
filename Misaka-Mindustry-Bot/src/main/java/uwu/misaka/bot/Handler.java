@@ -62,12 +62,12 @@ public class Handler {
             embedBuilder.addField("+канал <тип канала>","установка каналов для контента. если канал не установлен, вывод в бот канал\nДоступно для: \nРоль с правами на управление каналами\nАдминистраторы бота(только бот канал)",false);
             embedBuilder.addField("+помощь","помощь",false);
             embedBuilder.addField("Преобразование контента","Моды, плагины, карты, схемы преобразуются при отправке их в бот канал. Если канал типа контента существует, отправка туда, инначе в бот канал",false);
-            embedBuilder.addField("+аватар <упоменание/айди>","Совлерские фокусы с аватарками",false);
+            embedBuilder.addField("+ава <упоменание/айди>","Совлерские фокусы с аватарками",false);
             embedBuilder.addField("+хентай","Совлерские фокусы с хентаем | Только для администраторов сервера и администраторов бота | только в каналах с меткой nsfw | не работает",false);
             msg.getChannel().sendMessage(embedBuilder.build()).queue();
             return;
         }
-        if(msg.getContentRaw().equalsIgnoreCase("+ава")){
+        if(msg.getContentRaw().startsWith("+ава")){
             if(msg.getMentions().size()>0){
                 msg.getChannel().sendMessage(Ichi.botCore.getUserById(msg.getMentions().get(0).getIdLong()).getAvatarUrl()).queue();
                 return;
