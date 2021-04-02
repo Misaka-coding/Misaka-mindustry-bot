@@ -47,7 +47,7 @@ public class Handler {
                 default -> msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Канал данного типа не поддерживается.").setFooter("Доступные каналы:\nбот\nкарты\nсхемы\nмоды").setColor(Color.decode("#FF0000")).build()).queue();
             }
         }
-        
+
         if (DiscordServerConfig.get(msg.getGuild().getIdLong()).botChannel != 0 && msg.getChannel().getIdLong() != DiscordServerConfig.get(msg.getGuild().getIdLong()).botChannel) {
             return;
         }
@@ -64,7 +64,7 @@ public class Handler {
             embedBuilder.addField("Преобразование контента","Моды, плагины, карты, схемы преобразуются при отправке их в бот канал. Если канал типа контента существует, отправка туда, инначе в бот канал",false);
             embedBuilder.addField("+аватар <упоменание/айди>","Совлерские фокусы с аватарками | не работает",false);
             embedBuilder.addField("+хентай","Совлерские фокусы с хентаем | Только для администраторов сервера и администраторов бота | только в каналах с меткой nsfw | не работает",false);
-            msg.getChannel().sendMessage(embedBuilder.build());
+            msg.getChannel().sendMessage(embedBuilder.build()).queue();
             return;
         }
 
