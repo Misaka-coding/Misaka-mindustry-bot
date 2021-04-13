@@ -130,7 +130,7 @@ public class Handler {
             if (c.schematicsChannel == 0) {
                 msg.getChannel().sendFile(mapFile).addFile(imageFile).embed(builder.build()).queue();
             } else {
-                Objects.requireNonNull(Ichi.botCore.getTextChannelById(c.schematicsChannel)).sendFile(mapFile).addFile(imageFile).embed(builder.build()).queue();
+                Objects.requireNonNull(Ichi.botCore.getTextChannelById(c.mapsChannel)).sendFile(mapFile).addFile(imageFile).embed(builder.build()).queue();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -154,11 +154,17 @@ public class Handler {
             }
             StringBuilder field = new StringBuilder();
             for (ItemStack stack : schema.requirements()) {
-                java.util.List<Emote> emotes = Objects.requireNonNull(Ichi.botCore.getGuildById(Ichi.botBaseServer)).getEmotesByName(stack.item.name.replace("-", ""), true);
-                Emote result = emotes.isEmpty() ? msg.getGuild().getEmotesByName("ohno", true).get(0) : emotes.get(0);
+                java.util.List<Emote> emotes = msg.getGuild().getEmotesByName(stack.item.name.replace("-", ""), true);
+                Emote result;
+                try {
+                    result = emotes.isEmpty() ? msg.getGuild().getEmotesByName("ohno", true).get(0) : emotes.get(0);
+                } catch (Exception e) {
+                    emotes = Objects.requireNonNull(Ichi.botCore.getGuildById(Ichi.botBaseServer)).getEmotesByName(stack.item.name.replace("-", ""), true);
+                    result = emotes.isEmpty() ? Objects.requireNonNull(Ichi.botCore.getGuildById(Ichi.botBaseServer)).getEmotesByName("ohno", true).get(0) : emotes.get(0);
+                }
                 field.append(result.getAsMention()).append(stack.amount).append("  ");
             }
-            builder.addField("ребуемые Ресурсы", field.toString(), false);
+            builder.addField("Требуемые Ресурсы", field.toString(), false);
             if (schema.description().length() > 3) {
                 builder.addField("Описание", schema.description(), false);
             }
@@ -224,8 +230,8 @@ public class Handler {
             builder.addField("Тип модификации:","плагин",true);
         }else{
             builder.addField("Тип модификации:","мод",true);
-            if(meta.java){
-                builder.addField("Внимание!","Java модификации не всегда безопасны",false);
+            if (msg.getAttachments().get(0).getFileName().endsWith(".jar")) {
+                builder.addField("Внимание!", "Java модификации не всегда безопасны", false);
             }
         }
         if (msg.getContentRaw().length() > 3) {
