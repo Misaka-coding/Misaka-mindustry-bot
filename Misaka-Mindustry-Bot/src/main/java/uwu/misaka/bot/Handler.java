@@ -168,8 +168,8 @@ public class Handler {
             if (schema.description().length() > 3) {
                 builder.addField("Описание", schema.description(), false);
             }
-            builder.addField("Потребление энергии: ", schema.powerConsumption() + "", true);
-            builder.addField("Производство энергии: ", schema.powerProduction() + "", true);
+            builder.addField("Потребление энергии: ", (int) schema.powerConsumption() * 40 + "", true);
+            builder.addField("Производство энергии: ", (int) schema.powerProduction() * 40 + "", true);
 
             DiscordServerConfig c = DiscordServerConfig.get(msg.getGuild().getIdLong());
             if (c.schematicsChannel == 0) {
