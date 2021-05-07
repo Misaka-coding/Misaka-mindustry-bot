@@ -32,15 +32,13 @@ import mindustry.world.CachedTile;
 import mindustry.world.Tile;
 import mindustry.world.WorldContext;
 import mindustry.world.blocks.environment.OreBlock;
+import mindustry.world.blocks.logic.LogicDisplay;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.zip.InflaterInputStream;
@@ -314,8 +312,8 @@ public class ContentParser {
         }
 
         @Override
-        public TextureDataType getType(){
-            return TextureDataType.custom;
+        public boolean isCustom() {
+            return false;
         }
 
         @Override
@@ -331,6 +329,11 @@ public class ContentParser {
         @Override
         public Pixmap consumePixmap(){
             return null;
+        }
+
+        @Override
+        public Pixmap getPixmap() {
+            return TextureData.super.getPixmap();
         }
 
         @Override
@@ -364,10 +367,6 @@ public class ContentParser {
             return false;
         }
 
-        @Override
-        public boolean isManaged(){
-            return false;
-        }
     }
 
     static class ImageRegion extends TextureAtlas.AtlasRegion {
@@ -390,5 +389,60 @@ public class ContentParser {
         }catch(Exception e){
             throw new RuntimeException(e);
         }
+    }
+    public static Seq<BufferedImage> getProcessorImages(Schematic s) throws IOException {
+        Seq<BufferedImage> rtn= new Seq<>();
+        Seq<Schematic.Stile> processors= new Seq<>();
+        int displays_count = 0;
+        for(Schematic.Stile t: s.tiles){
+            if(t.block instanceof LogicDisplay){
+                displays_count++;
+            }
+            if(t.block == Blocks.microProcessor){
+                processors.add(t);
+            }
+        }
+        if(displays_count==0){
+            return rtn;
+        }
+        BufferedImage[] displays = new BufferedImage[displays_count];
+        for(Schematic.Stile t:processors){
+            DataInputStream stream = new DataInputStream((new ByteArrayInputStream(serializeObject(t.config))));
+            try {
+                int version = stream.read();
+                int bytelen = stream.readInt();
+                if (bytelen > 512000)
+                    throw new RuntimeException("Malformed logic data! Length: " + bytelen);
+                byte[] bytes = new byte[bytelen];
+                stream.readFully(bytes);
+                stream.readFully(bytes);
+                int total = stream.readInt();
+                if (version == 0) {
+                    for (int i = 0; i < total; i++)
+                        stream.readInt();
+                } else {
+                    for (int i = 0; i < total; i++) {
+                        String name = stream.readUTF();
+                    }
+                }
+                System.out.println(new String(bytes, Vars.charset));
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+        System.out.println("nya");
+        return rtn;
+    }
+
+    public static byte[] serializeObject(Object obj) throws IOException
+    {
+        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bytesOut);
+        oos.writeObject(obj);
+        oos.flush();
+        byte[] bytes = bytesOut.toByteArray();
+        bytesOut.close();
+        oos.close();
+        return bytes;
     }
 }
