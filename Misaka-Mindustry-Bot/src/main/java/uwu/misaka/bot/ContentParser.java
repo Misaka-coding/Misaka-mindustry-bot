@@ -407,14 +407,16 @@ public class ContentParser {
         }
         BufferedImage[] displays = new BufferedImage[displays_count];
         for(Schematic.Stile t:processors){
-            DataInputStream stream = new DataInputStream((new ByteArrayInputStream(serializeObject(t.config))));
+            byte[] data;
+            if (t.config instanceof byte[] && (data = (byte[])t.config) == (byte[])t.config)
             try {
+                DataInputStream stream = new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(data)));
                 int version = stream.read();
+                System.out.println(version);
                 int bytelen = stream.readInt();
                 if (bytelen > 512000)
                     throw new RuntimeException("Malformed logic data! Length: " + bytelen);
                 byte[] bytes = new byte[bytelen];
-                stream.readFully(bytes);
                 stream.readFully(bytes);
                 int total = stream.readInt();
                 if (version == 0) {
@@ -428,6 +430,7 @@ public class ContentParser {
                 System.out.println(new String(bytes, Vars.charset));
             }catch(Exception e){
                 e.printStackTrace();
+                break;
             }
         }
         System.out.println("nya");
