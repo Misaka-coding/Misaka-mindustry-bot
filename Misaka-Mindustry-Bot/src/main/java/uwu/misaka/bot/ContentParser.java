@@ -406,46 +406,60 @@ public class ContentParser {
             return rtn;
         }
         BufferedImage[] displays = new BufferedImage[displays_count];
+        String code="";
         for(Schematic.Stile t:processors){
             byte[] data;
             if (t.config instanceof byte[] && (data = (byte[])t.config) == (byte[])t.config)
             try {
                 DataInputStream stream = new DataInputStream(new InflaterInputStream(new ByteArrayInputStream(data)));
                 int version = stream.read();
-                System.out.println(version);
                 int bytelen = stream.readInt();
                 if (bytelen > 512000)
                     throw new RuntimeException("Malformed logic data! Length: " + bytelen);
                 byte[] bytes = new byte[bytelen];
                 stream.readFully(bytes);
-                int total = stream.readInt();
-                if (version == 0) {
-                    for (int i = 0; i < total; i++)
-                        stream.readInt();
-                } else {
-                    for (int i = 0; i < total; i++) {
-                        String name = stream.readUTF();
-                    }
-                }
-                System.out.println(new String(bytes, Vars.charset));
+                code = new String(bytes, Vars.charset);
             }catch(Exception e){
-                e.printStackTrace();
                 break;
+            }
+            Seq<String> drawCommands = new Seq<>();
+            for(String c:code.split("\n")){
+                if(c.startsWith("draw ")){
+                    drawCommands.add(c);
+                }
+                try{
+                if(c.startsWith("drawflush display")){
+                    if(displays[Integer.parseInt(c.substring(17))-1]==null){
+                        displays[Integer.parseInt(c.substring(17))-1]=new BufferedImage(200,200,BufferedImage.TYPE_INT_ARGB);
+                    }
+                    displays[Integer.parseInt(c.substring(17))-1]=executeCommands(displays[Integer.parseInt(c.substring(17))-1],drawCommands);
+                }}catch (Exception e){
+                    System.out.println("Exceprion");
+                }
             }
         }
         System.out.println("nya");
+        int i = 1;
+        rtn.addAll(displays);
+        for(BufferedImage img : rtn){
+            // TODO: 08.05.2021 remove useless option
+            ImageIO.write(img, "png", new File("out"+i+".png"));
+        }
         return rtn;
     }
-
-    public static byte[] serializeObject(Object obj) throws IOException
-    {
-        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(bytesOut);
-        oos.writeObject(obj);
-        oos.flush();
-        byte[] bytes = bytesOut.toByteArray();
-        bytesOut.close();
-        oos.close();
-        return bytes;
+    public static BufferedImage executeCommands(BufferedImage target,Seq<String> commands){
+        Graphics g = target.getGraphics();
+        for(String s : commands){
+            if(s.startsWith("draw color")){
+                String[] a=s.substring(11).split(" ");
+                java.awt.Color c = new java.awt.Color(Integer.parseInt(a[0]),Integer.parseInt(a[1]),Integer.parseInt(a[2]));
+                g.setColor(c);
+            }
+            if(s.startsWith("draw rect")){
+                String[] a=s.substring(10).split(" ");
+                g.drawRect(Integer.parseInt(a[0]),Integer.parseInt(a[1]),Integer.parseInt(a[2]),Integer.parseInt(a[3]));
+            }
+        }
+        return target;
     }
 }
