@@ -160,7 +160,6 @@ public class ContentParser {
             }
         };
     }
-
     private BufferedImage tint(BufferedImage image, Color color){
         BufferedImage copy = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
         Color tmp = new Color();
@@ -174,11 +173,9 @@ public class ContentParser {
         }
         return copy;
     }
-
     public Schematic parseSchematic(String text) throws Exception{
         return Schematics.read(download(text));
     }
-
     public BufferedImage previewSchematic(Schematic schem) throws Exception{
         BufferedImage image = new BufferedImage(schem.width * 32, schem.height * 32, BufferedImage.TYPE_INT_ARGB);
 
@@ -197,7 +194,6 @@ public class ContentParser {
 
         return image;
     }
-
     public Map readMap(InputStream is) throws IOException{
         try(InputStream ifs = new InflaterInputStream(is); CounterInputStream counter = new CounterInputStream(ifs); DataInputStream stream = new DataInputStream(counter)){
             Map out = new Map();
@@ -293,17 +289,14 @@ public class ContentParser {
             content.setTemporaryMapper(null);
         }
     }
-
     int conv(int rgba){
         return co.set(rgba).argb8888();
     }
-
     public static class Map{
         public String name, author, description;
         public ObjectMap<String, String> tags = new ObjectMap<>();
         public BufferedImage image;
     }
-
     static class ImageData implements TextureData{
         final BufferedImage image;
 
@@ -368,7 +361,6 @@ public class ContentParser {
         }
 
     }
-
     static class ImageRegion extends TextureAtlas.AtlasRegion {
         final BufferedImage image;
         final int x, y;
