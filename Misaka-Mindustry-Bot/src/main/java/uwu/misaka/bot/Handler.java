@@ -153,7 +153,7 @@ public class Handler {
             Schematics.write(schema, new Fi(schemaFile));
             ImageIO.write(preview, "png", previewFile);
             EmbedCreateSpec builder = new EmbedCreateSpec();
-            builder.setColor(Color.of(0,255,0)));
+            builder.setColor(Color.of(0,255,0));
             builder.setAuthor(msg.getAuthor().get().getUsername(), msg.getAuthor().get().getAvatarUrl(), msg.getAuthor().get().getAvatarUrl());
             builder.setTitle(schema.name());
             builder.setImage("attachment://" + previewFile.getName());
