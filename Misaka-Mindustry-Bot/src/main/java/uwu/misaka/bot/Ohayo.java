@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 
@@ -17,12 +18,9 @@ public class Ohayo {
     public static GatewayDiscordClient gateway;
 
     public static void main(String[] args){
-        final String token = args[0];
-        final DiscordClient client = DiscordClient.create(token);
+        DiscordClient client = DiscordClient.create(args[0]);
         gateway = client.login().block();
-        gateway.on(MessageCreateEvent.class).subscribe(event->{
-            listen(event.getMessage());
-        });
+        gateway.on(MessageCreateEvent.class).flatMap(event -> Mono.fromRunnable(() -> listen(event.getMessage()))).subscribe();
         gateway.onDisconnect().block();
     }
 }

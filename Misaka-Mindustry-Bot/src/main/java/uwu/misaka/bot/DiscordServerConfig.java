@@ -14,11 +14,7 @@ public class DiscordServerConfig {
          Ohayo.servers.add(this);
      }
 
-    public DiscordServerConfig() {
-
-    }
-
-     public static void load() throws IOException {
+    public static void load() throws IOException {
          File storage = new File("Storage.txt");
          if (!storage.exists()) {
              if (!storage.createNewFile()) {
@@ -30,24 +26,26 @@ public class DiscordServerConfig {
              String s = r.readLine();
              if (s != null) {
                  Ohayo.servers.add(fromJson(s));
-         }else{
-           break;
-         }
-       }
-     }
-     public static void save(){
-         try{
-         File storage=new File("Storage.txt");
-         if (!storage.exists()) {
-             if (!storage.createNewFile()) {
-                 return;
+             }else{
+                 break;
              }
          }
-         FileWriter w = new FileWriter(storage,false);
-         for(DiscordServerConfig c:Ohayo.servers){
-             w.append(c.toJson()).append("\n");
-         }
-         w.flush();} catch (IOException e) {
+     }
+
+     public static void save(){
+         try{
+             File storage=new File("Storage.txt");
+             if (!storage.exists()) {
+                 if (!storage.createNewFile()) {
+                     return;
+                 }
+             }
+             FileWriter w = new FileWriter(storage,false);
+             for(DiscordServerConfig c:Ohayo.servers){
+                 w.append(c.toJson()).append("\n");
+             }
+             w.flush();
+         } catch (IOException e) {
              e.printStackTrace();
          }
      }
@@ -55,12 +53,14 @@ public class DiscordServerConfig {
      public static DiscordServerConfig fromJson(String s){
          return Ohayo.gson.fromJson(s,DiscordServerConfig.class);
      }
+
      public String toJson(){
          return Ohayo.gson.toJson(this);
      }
-     public static DiscordServerConfig get(Long id){
+
+     public static DiscordServerConfig get(long id){
          for(DiscordServerConfig c:Ohayo.servers){
-             if(c.id==id){return c;}
+             if(c.id == id) return c;
          }
          return new DiscordServerConfig(id);
      }

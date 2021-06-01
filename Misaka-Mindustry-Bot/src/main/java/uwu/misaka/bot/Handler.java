@@ -8,7 +8,7 @@ import arc.util.serialization.Jval;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.*;
-import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.entity.channel.*;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.EmbedData;
 import discord4j.rest.entity.RestEmoji;
@@ -20,17 +20,16 @@ import mindustry.type.ItemStack;
 
 import discord4j.rest.util.Color;
 
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Handler {
     public static void handle(Message msg) {
+        MessageChannel channel = msg.getChannel().block();
         if (msg.getContent().startsWith("+канал ")) {
             String m = msg.getContent();
             if (m.length() < 8) return;
@@ -51,40 +50,47 @@ public class Handler {
                     setModsChannel(msg);
                     return;
                 }
-                default -> msg.getChannel().block().createEmbed(e->
-                    e.setTitle("Канал данного типа не поддерживается.").setFooter("Доступные каналы:\nбот\nкарты\nсхемы\nмоды","").setColor(discord4j.rest.util.Color.of(255,0,0))).block();
+                default -> channel.createEmbed(e-> e.setTitle("Канал данного типа не поддерживается.")
+                        .setFooter("Доступные каналы:\nбот\nкарты\nсхемы\nмоды","")
+                        .setColor(Color.of(255,0,0))).block();
             }
         }
 
-        if (DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).botChannel != 0 && msg.getGuild().block().getId().asLong() != DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).botChannel) {
+        if (DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).botChannel != 0 &&
+                msg.getGuild().block().getId().asLong() != DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).botChannel) {
             return;
         }
         if (DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).botChannel == 0 && msg.getContent().startsWith("+")) {
-            msg.getChannel().block().createEmbed(e->e.setTitle("Бот канал не установлен.").setFooter("Установите его с помощью команды +канал\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды","").setColor(discord4j.rest.util.Color.of(255,0,0))).block();
+            channel.createEmbed(e->e.setTitle("Бот канал не установлен.")
+                    .setFooter("Установите его с помощью команды +канал\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды", null)
+                    .setColor(Color.of(255,0,0))).block();
             return;
         }
-        if (msg.getContent().equalsIgnoreCase("+помощь")||msg.getContent().equalsIgnoreCase("+памагити")||msg.getContent().equalsIgnoreCase("+хелп")||msg.getContent().equalsIgnoreCase("+help")) {
-            msg.getChannel().block().createEmbed(e->
-            e.setTitle("ПОМОЩЬ")
-            .setColor(discord4j.rest.util.Color.of(0,255,0))
-            .addField("+канал <тип канала>","установка каналов для контента. если канал не установлен, вывод в бот канал\nДоступно для: \nРоль с правами на управление каналами\nАдминистраторы бота(только бот канал)",false)
-            .addField("+помощь","помощь",false)
-            .addField("Преобразование контента","Моды, плагины, карты, схемы преобразуются при отправке их в бот канал. Если канал типа контента существует, отправка туда, инначе в бот канал",false)
-            .addField("+ава <упоменание/айди>","Совлерские фокусы с аватарками",false)
-            .addField("+хентай","Совлерские фокусы с хентаем | Только для администраторов сервера и администраторов бота | только в каналах с меткой nsfw | не работает",false)).block();
+        if (msg.getContent().equalsIgnoreCase("+помощь") ||
+                msg.getContent().equalsIgnoreCase("+памагити") ||
+                msg.getContent().equalsIgnoreCase("+хелп") ||
+                msg.getContent().equalsIgnoreCase("+help")) {
+            channel.createEmbed(e-> e.setTitle("ПОМОЩЬ")
+                    .setColor(Color.of(0,255,0))
+                    .addField("+канал <тип канала>", "установка каналов для контента. если канал не установлен, вывод в бот канал\nДоступно для: \nРоль с правами на управление каналами\nАдминистраторы бота(только бот канал)",false)
+                    .addField("+помощь","помощь",false)
+                    .addField("Преобразование контента","Моды, плагины, карты, схемы преобразуются при отправке их в бот канал. Если канал типа контента существует, отправка туда, инначе в бот канал",false)
+                    .addField("+ава <упоменание/айди>","Совлерские фокусы с аватарками",false)
+                    .addField("+хентай","Совлерские фокусы с хентаем | Только для администраторов сервера и администраторов бота | только в каналах с меткой nsfw | не работает",false))
+                    .block();
             return;
         }
         if(msg.getContent().startsWith("+ава")){
             if(msg.getUserMentionIds().size()>0){
-                msg.getChannel().block().createMessage(((User)msg.getUserMentionIds().toArray()[0]).getAvatarUrl()).block();
+                channel.createMessage(((User)msg.getUserMentionIds().toArray()[0]).getAvatarUrl()).block();
                 return;
             }else{
                 if(msg.getContent().length()>5){
-                msg.getChannel().block().createMessage(msg.getGuild().block().getMemberById(Snowflake.of(msg.getContent().substring(5))).block().getAvatarUrl()).block();
-                return;
+                    channel.createMessage(msg.getGuild().block().getMemberById(Snowflake.of(msg.getContent().substring(5))).block().getAvatarUrl()).block();
+                    return;
                 }
             }
-            msg.getChannel().block().createEmbed(e->e.setTitle("Участник не найден.").setColor(Color.of(255,0,0))).block();
+            channel.createEmbed(e->e.setTitle("Участник не найден.").setColor(Color.of(255,0,0))).block();
         }
 
         if (msg.getAttachments().size() != 1) {
@@ -95,7 +101,9 @@ public class Handler {
 
         if (a.getFilename().endsWith(".msch")) {
             if (DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).botChannel == 0) {
-                msg.getChannel().block().createEmbed(e->e.setTitle("Бот канал не установлен.").setFooter("Установите его с помощью команды +канал\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды","").setColor(discord4j.rest.util.Color.of(255,0,0))).block();
+                channel.createEmbed(e->e.setTitle("Бот канал не установлен.")
+                        .setFooter("Установите его с помощью команды +канал\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды",null)
+                        .setColor(Color.of(255,0,0))).block();
                 return;
             }
             parseSchematic(msg);
@@ -103,7 +111,9 @@ public class Handler {
         }
         if (a.getFilename().endsWith(".zip") || a.getFilename().endsWith(".jar")) {
             if (DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).botChannel == 0) {
-                msg.getChannel().block().createEmbed(e->e.setTitle("Бот канал не установлен.").setFooter("Установите его с помощью команды +канал\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды","").setColor(discord4j.rest.util.Color.of(255,0,0))).block();
+                channel.createEmbed(e->e.setTitle("Бот канал не установлен.")
+                        .setFooter("Установите его с помощью команды +канал\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды",null)
+                        .setColor(Color.of(255,0,0))).block();
                 return;
             }
             parseModPlugin(msg);
@@ -111,7 +121,9 @@ public class Handler {
         }
         if (a.getFilename().endsWith(".msav")) {
             if (DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).botChannel == 0) {
-                msg.getChannel().block().createEmbed(e->e.setTitle("Бот канал не установлен.").setFooter("Установите его с помощью команды +канал\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды","").setColor(discord4j.rest.util.Color.of(255,0,0))).block();
+                channel.createEmbed(e->e.setTitle("Бот канал не установлен.")
+                        .setFooter("Установите его с помощью команды +канал\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды",null)
+                        .setColor(Color.of(255,0,0))).block();
                 return;
             }
             parseMap(msg);
@@ -134,10 +146,32 @@ public class Handler {
             if (map.author.length() > 3) builder.addField("Автор: ", map.author, true);
             if (map.description.length() > 3) builder.addField("Описание: ", map.description, true);
             DiscordServerConfig c = DiscordServerConfig.get(msg.getGuild().block().getId().asLong());
+
+            FileInputStream inputStream1;
+            try{
+                inputStream1 = new FileInputStream(mapFile);
+            }catch(FileNotFoundException e){
+                throw new RuntimeException(e);
+            }
+
+            FileInputStream inputStream2;
+            try{
+                inputStream2 = new FileInputStream(imageFile);
+            }catch(FileNotFoundException e){
+                throw new RuntimeException(e);
+            }
+
             if (c.schematicsChannel == 0) {
-                msg.getChannel().block().sendFile(mapFile).addFile(imageFile).embed(builder.build()).queue();
+                msg.getChannel().block().createMessage(spec -> spec.addFile(mapFile.getName(), inputStream1)
+                        .addFile(imageFile.getName(), inputStream2)
+                        .setEmbed(embed -> embed.from(builder.asRequest())))
+                        .block();
             } else {
-                Objects.requireNonNull(msg.getGuild().block().getChannelById(Snowflake.of(c.mapsChannel)).block()).sendFile(mapFile).addFile(imageFile).embed(builder.build()).queue();
+                msg.getGuild().block().getChannelById(Snowflake.of(c.mapsChannel)).cast(GuildMessageChannel.class).block()
+                        .createMessage(spec -> spec.addFile(mapFile.getName(), inputStream1)
+                                .addFile(imageFile.getName(), inputStream2)
+                                .setEmbed(embed -> embed.from(builder.asRequest())))
+                        .block();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -148,25 +182,24 @@ public class Handler {
         try {
             Schematic schema =  Ohayo.parser.parseSchematic(((Attachment)msg.getAttachments().toArray()[0]).getUrl());
             BufferedImage preview =  Ohayo.parser.previewSchematic(schema);
-            File previewFile = new File("img_" + "shema" + ".png");
-            File schemaFile = new File(schema.name().replaceAll(" ", "_") + "." + "msch");
-            Schematics.write(schema, new Fi(schemaFile));
-            ImageIO.write(preview, "png", previewFile);
+            Fi previewFile = Fi.get("img_shema.png");
+            Fi schemaFile = Fi.get(schema.name().replaceAll(" ", "_") + ".msch");
+            Schematics.write(schema, schemaFile);
+            ImageIO.write(preview, "png", previewFile.file());
             EmbedCreateSpec builder = new EmbedCreateSpec();
-            builder.setColor(Color.of(0,255,0)));
+            builder.setColor(Color.of(0,255,0));
             builder.setAuthor(msg.getAuthor().get().getUsername(), msg.getAuthor().get().getAvatarUrl(), msg.getAuthor().get().getAvatarUrl());
             builder.setTitle(schema.name());
-            builder.setImage("attachment://" + previewFile.getName());
+            builder.setImage("attachment://" + previewFile.name());
             if (msg.getContent().length() > 3) {
                 builder.addField("От " + msg.getAuthor().get().getUsername(), msg.getContent(), false);
             }
             StringBuilder field = new StringBuilder();
             for (ItemStack stack : schema.requirements()) {
-                java.util.List<GuildEmoji> emotes = new ArrayList<>();
-                java.util.List<GuildEmoji> finalEmotes = emotes;
-                msg.getGuild().block().getEmojis().all(a -> {if(a.getName().equals(stack.item.name.replace("-", ""))){
-                    finalEmotes.add(a);}return false;}
-                );
+                List<GuildEmoji> emotes = new ArrayList<>();
+                msg.getGuild().block().getEmojis().filter(a -> a.getName().equals(stack.item.name.replace("-", "")))
+                        .doOnNext(emotes::add).then()
+                        .block();
                 GuildEmoji result;
                 try {
                     result = emotes.isEmpty() ? msg.getGuild().block().getEmojis().filter(a->a.getName().startsWith("ohno")).blockFirst() : emotes.get(0);
@@ -184,10 +217,18 @@ public class Handler {
             builder.addField("Производство энергии: ", (int) schema.powerProduction() * 40 + "", true);
 
             DiscordServerConfig c = DiscordServerConfig.get(msg.getGuild().block().getId().asLong());
+
             if (c.schematicsChannel == 0) {
-                msg.getChannel().sendFile(schemaFile).addFile(previewFile).embed(builder.build()).queue();
+                msg.getChannel().block().createMessage(spec -> spec.addFile(schemaFile.name(), schemaFile.read())
+                        .addFile(previewFile.name(), previewFile.read())
+                        .setEmbed(embed -> embed.from(builder.asRequest())))
+                        .block();
             } else {
-                Objects.requireNonNull(msg.getGuild().block().getChannelById(Snowflake.of(c.schematicsChannel)).block()).sendFile(schemaFile).addFile(previewFile).embed(builder.build()).queue();
+                msg.getGuild().block().getChannelById(Snowflake.of(c.schematicsChannel)).cast(GuildMessageChannel.class).block()
+                        .createMessage(spec -> spec.addFile(schemaFile.name(), schemaFile.read())
+                                .addFile(previewFile.name(), previewFile.read())
+                                .setEmbed(embed -> embed.from(builder.asRequest())))
+                        .block();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -195,6 +236,11 @@ public class Handler {
     }
 
     public static void parseModPlugin(Message msg) {
+        User user = msg.getAuthor().orElse(null);
+        if (user == null){
+            return;
+        }
+
         if (new File("mods/").mkdir()) {
             System.out.print(" ");
         }
@@ -213,7 +259,8 @@ public class Handler {
                         zip.child("plugin.json").exists() ? zip.child("plugin.json") :
                                 zip.child("plugin.hjson");
         if (!metaf.exists()) {
-            msg.getChannel().block().createEmbed(e->e.setTitle("Мета данные не найдены.").setColor(Color.of(255,0,0))).block();
+            msg.getChannel().block().createEmbed(e->e.setTitle("Мета данные не найдены.")
+                    .setColor(Color.of(255,0,0))).block();
             return;
         }
         boolean isPlugin = metaf.name().startsWith("plugin");
@@ -247,65 +294,101 @@ public class Handler {
             }
         }
         if (msg.getContent().length() > 3) {
-            builder.addField("От " + msg.getAuthor().get().getUsername(), msg.getContent(), false);
+            builder.addField("От " + user.getUsername(), msg.getContent(), false);
         }
-        builder.setAuthor(msg.getAuthor().get().getUsername(), msg.getAuthor().get().getAvatarUrl(), msg.getAuthor().get().getAvatarUrl());
+        builder.setAuthor(user.getUsername(), user.getAvatarUrl(), user.getAvatarUrl());
         DiscordServerConfig c = DiscordServerConfig.get(msg.getGuild().block().getId().asLong());
-        if(zip.child("icon.png").exists()){
-        if (c.schematicsChannel == 0) {
-            msg.getChannel().sendFile(modFile).addFile(new File("mods/icon.png")).embed(builder.build()).queue();
-        } else {
-            Objects.requireNonNull(msg.getGuild().block().getChannelById(Snowflake.of(c.modsChannel)).sendFile(modFile).addFile(new File("mods/icon.png")).embed(builder.build()).queue();
+        FileInputStream inputStream1;
+        try{
+            inputStream1 = new FileInputStream(modFile);
+        }catch(FileNotFoundException e){
+            throw new RuntimeException(e);
         }
+        if(zip.child("icon.png").exists()){
+            FileInputStream inputStream2;
+            try{
+                inputStream2 = new FileInputStream("mods/icon.png");
+            }catch(FileNotFoundException e){
+                throw new RuntimeException(e);
+            }
+            if (c.schematicsChannel == 0) {
+                msg.getChannel().block().createMessage(spec -> spec.addFile(modFile.getName(), inputStream1)
+                        .addFile("mods/icon.png", inputStream2)
+                        .setEmbed(embed -> embed.from(builder.asRequest())))
+                        .block();
+            } else {
+                msg.getGuild().block().getChannelById(Snowflake.of(c.modsChannel)).cast(GuildMessageChannel.class).block()
+                        .createMessage(spec -> spec.addFile(modFile.getName(), inputStream1)
+                                .addFile("mods/icon.png", inputStream2)
+                                .setEmbed(embed -> embed.from(builder.asRequest())))
+                        .block();
+            }
         }else{
             if (c.schematicsChannel == 0) {
-                msg.getChannel().sendFile(modFile).embed(builder.build()).queue();
+                msg.getChannel().block().createMessage(spec -> spec.addFile(modFile.getName(), inputStream1)
+                        .setEmbed(embed -> embed.from(embed.asRequest())))
+                        .block();
             } else {
-                Objects.requireNonNull(msg.getGuild().block().getChannelById(Snowflake.of(c.modsChannel)).block()).sendFile(modFile).embed(builder.build()).queue();
+                msg.getGuild().block().getChannelById(Snowflake.of(c.modsChannel)).cast(GuildMessageChannel.class).block()
+                        .createMessage(spec -> spec.addFile(modFile.getName(), inputStream1)
+                                .setEmbed(embed -> embed.from(embed.asRequest())))
+                        .block();
             }
         }
     }
 
     public static void setBotChannel(Message msg) {
-        if (Objects.requireNonNull(msg.getGuild().block().getMemberById(msg.getAuthor().get().getId())).block().getBasePermissions().block().contains(Permission.MANAGE_CHANNELS) || msg.getAuthor().get().getId().asLong() == 826128001145765935L) {
+        if (Objects.requireNonNull(msg.getGuild().block().getMemberById(msg.getAuthor().get().getId())).block().getBasePermissions().block().contains(Permission.MANAGE_CHANNELS) ||
+                msg.getAuthor().get().getId().asLong() == 826128001145765935L) {
             DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).botChannel = msg.getChannel().block().getId().asLong();
-            msg.getChannel().block().createEmbed(e->e.setTitle("Канал успешно установлен.").setColor(Color.of(0,0,255))).block();
+            msg.getChannel().block().createEmbed(e->e.setTitle("Канал успешно установлен.")
+                    .setColor(Color.of(0,0,255))).block();
             DiscordServerConfig.save();
             return;
         }
-        msg.getChannel().block().createEmbed(e->e.setTitle("Недостаточно полномочий.").setColor(Color.of(255,0,0))).block();
+        msg.getChannel().block().createEmbed(e->e.setTitle("Недостаточно полномочий.")
+                .setColor(Color.of(255,0,0))).block();
 
     }
 
     public static void setMapChannel(Message msg) {
-        if (Objects.requireNonNull(msg.getGuild().block().getMemberById(msg.getAuthor().get().getId())).block().getBasePermissions().block().contains(Permission.MANAGE_CHANNELS) || msg.getAuthor().get().getId().asLong() == 826128001145765935L) {
+        if (Objects.requireNonNull(msg.getGuild().block().getMemberById(msg.getAuthor().get().getId())).block().getBasePermissions().block().contains(Permission.MANAGE_CHANNELS) ||
+                msg.getAuthor().get().getId().asLong() == 826128001145765935L) {
             DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).mapsChannel = msg.getChannel().block().getId().asLong();
-            msg.getChannel().block().createEmbed(e->e.setTitle("Канал успешно установлен.").setColor(Color.of(0,0,255))).block();
+            msg.getChannel().block().createEmbed(e->e.setTitle("Канал успешно установлен.")
+                    .setColor(Color.of(0,0,255))).block();
             DiscordServerConfig.save();
             return;
         }
-        msg.getChannel().block().createEmbed(e->e.setTitle("Недостаточно полномочий.").setColor(Color.of(255,0,0))).block();
+        msg.getChannel().block().createEmbed(e->e.setTitle("Недостаточно полномочий.")
+                .setColor(Color.of(255,0,0))).block();
 
     }
 
     public static void setSchematicChannel(Message msg) {
-        if (Objects.requireNonNull(msg.getGuild().block().getMemberById(msg.getAuthor().get().getId())).block().getBasePermissions().block().contains(Permission.MANAGE_CHANNELS) || msg.getAuthor().get().getId().asLong() == 826128001145765935L) {
+        if (Objects.requireNonNull(msg.getGuild().block().getMemberById(msg.getAuthor().get().getId())).block().getBasePermissions().block().contains(Permission.MANAGE_CHANNELS) ||
+                msg.getAuthor().get().getId().asLong() == 826128001145765935L) {
             DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).schematicsChannel = msg.getChannel().block().getId().asLong();
-            msg.getChannel().block().createEmbed(e->e.setTitle("Канал успешно установлен.").setColor(Color.of(0,0,255))).block();
+            msg.getChannel().block().createEmbed(e->e.setTitle("Канал успешно установлен.")
+                    .setColor(Color.of(0,0,255))).block();
             DiscordServerConfig.save();
             return;
         }
-        msg.getChannel().block().createEmbed(e->e.setTitle("Недостаточно полномочий.").setColor(Color.of(255,0,0))).block();
+        msg.getChannel().block().createEmbed(e->e.setTitle("Недостаточно полномочий.")
+                .setColor(Color.of(255,0,0))).block();
 
     }
 
     public static void setModsChannel(Message msg) {
-        if (Objects.requireNonNull(msg.getGuild().block().getMemberById(msg.getAuthor().get().getId())).block().getBasePermissions().block().contains(Permission.MANAGE_CHANNELS) || msg.getAuthor().get().getId().asLong() == 826128001145765935L) {
+        if (Objects.requireNonNull(msg.getGuild().block().getMemberById(msg.getAuthor().get().getId())).block().getBasePermissions().block().contains(Permission.MANAGE_CHANNELS) ||
+                msg.getAuthor().get().getId().asLong() == 826128001145765935L) {
             DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).modsChannel = msg.getChannel().block().getId().asLong();
-            msg.getChannel().block().createEmbed(e->e.setTitle("Канал успешно установлен.").setColor(Color.of(0,0,255))).block();
+            msg.getChannel().block().createEmbed(e->e.setTitle("Канал успешно установлен.")
+                    .setColor(Color.of(0,0,255))).block();
             DiscordServerConfig.save();
             return;
         }
-        msg.getChannel().block().createEmbed(e->e.setTitle("Недостаточно полномочий.").setColor(Color.of(255,0,0))).block();
+        msg.getChannel().block().createEmbed(e->e.setTitle("Недостаточно полномочий.")
+                .setColor(Color.of(255,0,0))).block();
     }
 }
