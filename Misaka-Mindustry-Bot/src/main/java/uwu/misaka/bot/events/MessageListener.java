@@ -7,6 +7,7 @@ import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
+import uwu.misaka.bot.Handler;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,7 +19,6 @@ public class MessageListener {
 
     public static void listen(Message message){
         if(message.getAuthor()==null||message==null){return;}
-
         log(message);
         try{
         if(message.getAuthor().get().isBot()){
@@ -27,6 +27,7 @@ public class MessageListener {
         }catch (Exception e){
             return;
         }
+        Handler.handle(message);
     }
     public static void log(Message message){
         //System.out.println(loggerFormat.format(new Date()) + "│" + formatText(message.getGuild().block().getName(), 13) + "│" + formatText(Objects.requireNonNull(message.getChannel().ofType(GuildChannel.class).map(GuildChannel::getName).block()),15) + "│" + formatText(message.getAuthor().get().getUsername(),10) + ": " + message.getContent());
