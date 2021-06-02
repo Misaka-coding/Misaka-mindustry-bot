@@ -58,7 +58,6 @@ public class Handler {
 
         if (DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).botChannel != 0 &&
                 msg.getChannel().block().getId().asLong() != DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).botChannel) {
-            System.out.println(msg.getGuild().block().getId().asLong()+" "+DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).botChannel);
             return;
         }
         if (DiscordServerConfig.get(msg.getGuild().block().getId().asLong()).botChannel == 0 && msg.getContent().startsWith("+")) {
@@ -203,10 +202,10 @@ public class Handler {
                         .block();
                 GuildEmoji result;
                 try {
-                    result = emotes.isEmpty() ? msg.getGuild().block().getEmojis().filter(a->a.getName().startsWith("ohno")).blockFirst() : emotes.get(0);
+                    result = emotes.isEmpty() ? msg.getGuild().block().getEmojis().filter(a->a.getName().startsWith("oh")).blockFirst() : emotes.get(0);
                 } catch (Exception e) {
                     emotes.add(Objects.requireNonNull(Ohayo.gateway.getGuildById(Snowflake.of(Ohayo.botBaseServer)).block()).getEmojis().filter(a -> a.getName().equals(stack.item.name.replace("-", ""))).blockFirst());
-                    result = emotes.isEmpty() ? Objects.requireNonNull(Ohayo.gateway.getGuildById(Snowflake.of(Ohayo.botBaseServer)).block()).getEmojis().filter(a->a.getName().startsWith("oh")).blockFirst() : emotes.get(0);
+                    result = emotes.isEmpty() ? Objects.requireNonNull(Ohayo.gateway.getGuildById(Snowflake.of(Ohayo.botBaseServer)).block()).getEmojis().filter(a->a.getName().startsWith("ohno")).blockFirst() : emotes.get(0);
                 }
                 field.append(result.asFormat()).append(stack.amount).append("  ");
             }
