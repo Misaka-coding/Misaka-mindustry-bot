@@ -21,13 +21,10 @@ public class MessageListener {
         if(message.getAuthor()==null||message==null){return;}
         log(message);
         try{
-        if(message.getAuthor().get().isBot()){
-            return;
-        }
+            Handler.handle(message);
         }catch (Exception e){
             return;
         }
-        Handler.handle(message);
     }
     public static void log(Message message){
         //System.out.println(loggerFormat.format(new Date()) + "│" + formatText(message.getGuild().block().getName(), 13) + "│" + formatText(Objects.requireNonNull(message.getChannel().ofType(GuildChannel.class).map(GuildChannel::getName).block()),15) + "│" + formatText(message.getAuthor().get().getUsername(),10) + ": " + message.getContent());
