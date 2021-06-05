@@ -9,9 +9,12 @@ public class DiscordServerConfig {
     public long mapsChannel = 0;
     public long modsChannel = 0;
 
-     public DiscordServerConfig(Long id) {
+     public DiscordServerConfig(long id) {
          this.id = id;
          Ohayo.servers.add(this);
+     }
+     public DiscordServerConfig(long id,long botChannel,long schematicsChannel,long mapsChannel,long modsChannel) {
+         this.id = id;
      }
 
     public static void load() throws IOException {

@@ -1,12 +1,7 @@
 package uwu.misaka.bot.events;
 
-import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.GuildChannel;
-import discord4j.core.object.entity.channel.TextChannel;
-import reactor.core.publisher.Mono;
-import reactor.function.TupleUtils;
 import uwu.misaka.bot.Handler;
 
 import java.text.SimpleDateFormat;
