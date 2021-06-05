@@ -16,6 +16,8 @@ public class MessageListener {
         if(message.getAuthor()==null||message==null){return;}
         log(message);
         try{
+            if(message.getAuthor().get().isBot()){return;}
+            Handler.read(message);
             Handler.handle(message);
         }catch (Exception e){
             return;

@@ -28,6 +28,12 @@ import java.util.List;
 import java.util.Objects;
 
 public class Handler {
+    public static void read(Message msg){
+        if(msg.getContent().equalsIgnoreCase("ня")||msg.getContent().equalsIgnoreCase("nya")){
+            msg.getChannel().block().createMessage("ня").block();
+        }
+    }
+
     public static void handle(Message msg) {
         MessageChannel channel = msg.getChannel().block();
         if (msg.getContent().startsWith("+канал ")) {
