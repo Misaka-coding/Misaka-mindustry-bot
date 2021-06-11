@@ -1,5 +1,6 @@
 package uwu.misaka.bot.events;
 
+import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.GuildChannel;
 import uwu.misaka.bot.Handler;
@@ -24,28 +25,52 @@ public class MessageListener {
         }
     }
     public static void log(Message message){
-        //System.out.println(loggerFormat.format(new Date()) + "│" + formatText(message.getGuild().block().getName(), 13) + "│" + formatText(Objects.requireNonNull(message.getChannel().ofType(GuildChannel.class).map(GuildChannel::getName).block()),15) + "│" + formatText(message.getAuthor().get().getUsername(),10) + ": " + message.getContent());
+        String msg = message.getContent();
+        if(message.getEmbeds().size()>0){
+            for(Embed e:message.getEmbeds()){
+               msg+="\n"+e.toString();
+            }
+        }
         try{
-        parseMessageToPGUI(message.getGuild().block().getName(),Objects.requireNonNull(message.getChannel().ofType(GuildChannel.class).map(GuildChannel::getName).block()),message.getAuthor().get().getUsername(),message.getContent());}catch (Exception e){
+        parseMessageToPGUI(message.getGuild().block().getName(),Objects.requireNonNull(message.getChannel().ofType(GuildChannel.class).map(GuildChannel::getName).block()),message.getAuthor().get().getUsername(),msg,message.getChannel().block().getId().asString());}catch (Exception e){
             try{
-            parseMessageToPGUI(message.getGuild().block().getName(),"АнонимуС",message.getAuthor().get().getUsername(),message.getContent());}catch(Exception ignored){}
+            parseMessageToPGUI(message.getGuild().block().getName(),"АнонимуС",message.getAuthor().get().getUsername(),msg,message.getChannel().block().getId().asString());}catch(Exception ignored){}
         }
     }
-    private static void parseMessageToPGUI(String guild,String channel,String author,String text){
+    @Deprecated
+    private static void parseMessageToPGUI(String guild,String channel,String author,String text,String channelId){
         ArrayList<String> strings = new ArrayList<>();
         for(String s : text.split("\n")){
-        while(s.length()>40){
-            strings.add(s.substring(0,39));
-            s=s.substring(39);
+        while(s.length()>20){
+            strings.add(s.substring(0,19));
+            s=s.substring(19);
         }
         strings.add(s);
         }
-        System.out.println("│"+loggerFormat.format(new Date()) + "│" + formatText(guild, 15) + "│" + formatText(channel,15) + "│" + formatText(author,13) + "│" + formatText(strings.get(0),40)+"│");
+        System.out.println("│"+loggerFormat.format(new Date()) + "│" + formatText(guild, 15) + "│" + formatText(channel,15) + "│"+formatText(channelId,18) + "│" + formatText(author,13) + "│" + formatText(strings.get(0),20)+"│");
         strings.remove(0);
         for(String s:strings){
-            System.out.println("│                   │               │               │             │"+formatText(s,40)+"│");
+            System.out.println("│                   │               │               │                  │             │"+formatText(s,20)+"│");
         }
-        System.out.println("├───────────────────┼───────────────┼───────────────┼─────────────┼────────────────────────────────────────┤");
+        System.out.println("├───────────────────┼───────────────┼───────────────┼──────────────────┼─────────────┼────────────────────┤");
+    }
+    private static String parseMessageToLogTXT(String guild,String channel,String author,String text){
+        StringBuilder rtn=new StringBuilder();
+        ArrayList<String> strings = new ArrayList<>();
+        for(String s : text.split("\n")){
+            while(s.length()>60){
+                strings.add(s.substring(0,59));
+                s=s.substring(59);
+            }
+            strings.add(s);
+        }
+        rtn.append("│"+loggerFormat.format(new Date()) + "│" + formatText(guild, 30) + "│" + formatText(channel,30) + "│" + formatText(author,26) + "│" + formatText(strings.get(0),60)+"│");
+        strings.remove(0);
+        for(String s:strings){
+            rtn.append("│                   │                              │                              │                          │"+formatText(s,60)+"\n│");
+        }
+        rtn.append("├───────────────────┼──────────────────────────────┼──────────────────────────────┼──────────────────────────┼────────────────────────────────────────────────────────────┤\n");
+        return rtn.toString();
     }
     private static String formatText(String s,int index){
         if(s.length()>index){
