@@ -13,11 +13,11 @@ public class CallBackModule {
         }
         Ohayo.gateway.getChannelById(Snowflake.of(lastChannel)).cast(GuildMessageChannel.class).block().createMessage(text);
     };
-    public static void getThis(){
+    public static void getThis(){try{
         if(lastChannel==0){
             lastChannel= MessageListener.last;
         }
-        System.out.println("Выбран канал "+Ohayo.gateway.getChannelById(Snowflake.of(lastChannel)).cast(GuildMessageChannel.class).block().getName());
+        System.out.println("Выбран канал "+Ohayo.gateway.getChannelById(Snowflake.of(lastChannel)).cast(GuildMessageChannel.class).block().getName());}catch(Exception ignored){}
     };
     public static boolean changeChannel(String id){
         try{
