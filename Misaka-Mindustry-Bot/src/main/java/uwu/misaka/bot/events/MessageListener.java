@@ -3,6 +3,7 @@ package uwu.misaka.bot.events;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.GuildChannel;
+import uwu.misaka.bot.CallBackModule;
 import uwu.misaka.bot.Handler;
 
 import java.text.SimpleDateFormat;
@@ -11,6 +12,7 @@ import java.util.Date;
 import java.util.Objects;
 
 public class MessageListener {
+    public static long last;
     public static final SimpleDateFormat loggerFormat = new SimpleDateFormat("dd.MM.YYYY HH:mm:ss");
 
     public static void listen(Message message){
@@ -24,6 +26,19 @@ public class MessageListener {
             return;
         }
     }
+
+    public static void consoleListen(String message){
+        if(message.startsWith("+канал ")){
+            CallBackModule.changeChannel(message.substring(7));
+            return;
+        }
+        if(message.startsWith("+канал")){
+            CallBackModule.getThis();
+            return;
+        }
+        CallBackModule.sendToThis(message);
+    }
+
     public static void log(Message message){
         String msg = message.getContent();
         if(message.getEmbeds().size()>0){
@@ -36,8 +51,8 @@ public class MessageListener {
             try{
             parseMessageToPGUI(message.getGuild().block().getName(),"АнонимуС",message.getAuthor().get().getUsername(),msg,message.getChannel().block().getId().asString());}catch(Exception ignored){}
         }
+        last=message.getChannel().block().getId().asLong();
     }
-    @Deprecated
     private static void parseMessageToPGUI(String guild,String channel,String author,String text,String channelId){
         ArrayList<String> strings = new ArrayList<>();
         for(String s : text.split("\n")){
