@@ -24,6 +24,12 @@ public class Ohayo {
         DiscordClient client = DiscordClient.create(args[0]);
         gateway = client.login().block();
         DiscordServerConfig.load();
+        Thread thread = new Thread(()->{Scanner scanner = new Scanner(System.in);
+        while(scanner.hasNextLine())
+            {MessageListener.consoleListen(scanner.nextLine());}});
+        thread.setDaemon(true);
+        thread.setName("console lister");
+        thread.start();
 
         gateway.on(MessageCreateEvent.class).flatMap(event -> Mono.fromRunnable(() -> listen(event.getMessage()))).subscribe();
         gateway.onDisconnect().block();
