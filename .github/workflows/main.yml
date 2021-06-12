@@ -12,8 +12,10 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 14
+    - name: install gradle
+      run: wget https://downloads.gradle-dn.com/distributions/gradle-6.8.3-bin.zip && mkdir /opt/gradle && unzip -d /opt/gradle gradle-6.8.3-bin.zip && export PATH=$PATH:/opt/gradle/gradle-6.8.3/bin
     - name: Build bot's jar
-      run: cd Misaka-Mindustry-Bot && ./gradlew dist
+      run: cd Misaka-Mindustry-Bot && gradle dist
     - name: Upload built jar file
       uses: actions/upload-artifact@v2
       with:
