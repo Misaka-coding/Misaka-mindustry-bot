@@ -11,7 +11,7 @@ public class CallBackModule {
         if(lastChannel==0){
             lastChannel= MessageListener.last;
         }
-        Ohayo.gateway.getChannelById(Snowflake.of(lastChannel)).cast(GuildMessageChannel.class).block().createMessage(text);
+        Ohayo.gateway.getChannelById(Snowflake.of(lastChannel)).cast(GuildMessageChannel.class).block().createMessage(text).block();
     };
     public static void getThis(){try{
         if(lastChannel==0){
