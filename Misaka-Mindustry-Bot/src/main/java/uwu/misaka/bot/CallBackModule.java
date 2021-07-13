@@ -1,7 +1,5 @@
 package uwu.misaka.bot;
 
-import discord4j.common.util.Snowflake;
-import discord4j.core.object.entity.channel.GuildMessageChannel;
 import uwu.misaka.bot.events.MessageListener;
 
 public class CallBackModule {
@@ -11,19 +9,22 @@ public class CallBackModule {
         if(lastChannel==0){
             lastChannel= MessageListener.last;
         }
-        Ohayo.gateway.getChannelById(Snowflake.of(lastChannel)).cast(GuildMessageChannel.class).block().createMessage(text).block();
+        Ohayo.api.getChannelById(lastChannel).get().asTextChannel().get().sendMessage(text);
     };
-    public static void getThis(){try{
-        if(lastChannel==0){
-            lastChannel= MessageListener.last;
+    public static void getThis(){
+        try {
+            if (lastChannel == 0) {
+                lastChannel = MessageListener.last;
+            }
+            System.out.println("Выбран канал " + Ohayo.api.getChannelById(lastChannel).get().asServerChannel().get().getName());
+        } catch (Exception ignored) {
         }
-        System.out.println("Выбран канал "+Ohayo.gateway.getChannelById(Snowflake.of(lastChannel)).cast(GuildMessageChannel.class).block().getName());}catch(Exception ignored){}
     };
     public static boolean changeChannel(String id){
         try{
-            long a = Ohayo.gateway.getChannelById(Snowflake.of(id)).block().getId().asLong();
+            long a = Ohayo.api.getChannelById(id).get().getId();
             lastChannel = a;
-            System.out.println("Выбран канал "+Ohayo.gateway.getChannelById(Snowflake.of(lastChannel)).cast(GuildMessageChannel.class).block().getName());
+            System.out.println("Выбран канал " + Ohayo.api.getChannelById(lastChannel).get().asServerChannel().get().getName());
         }catch (Exception e){
             System.out.println("Ошибка");
             return false;

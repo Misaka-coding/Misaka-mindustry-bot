@@ -1,33 +1,36 @@
 package uwu.misaka.bot.events;
 
-import discord4j.core.object.Embed;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.GuildChannel;
+import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.embed.Embed;
+import org.javacord.api.event.message.MessageCreateEvent;
 import uwu.misaka.bot.CallBackModule;
 import uwu.misaka.bot.Handler;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Objects;
 
 public class MessageListener {
     public static long last;
     public static final SimpleDateFormat loggerFormat = new SimpleDateFormat("dd.MM.YYYY HH:mm:ss");
 
-    public static void listen(Message message){
-        if(message.getAuthor()==null||message==null){return;}
-        log(message);
-        try{
-            if(message.getAuthor().get().isBot()){return;}
+    public static void listen(MessageCreateEvent message) {
+        if (message.getMessage().getAuthor() == null || message == null) {
+            return;
+        }
+        log(message.getMessage());
+        try {
+            if (message.getMessage().getAuthor().isBotUser()) {
+                return;
+            }
             Handler.read(message);
             Handler.handle(message);
-        }catch (Exception e){
+        } catch (Exception e) {
             return;
         }
     }
 
-    public static void consoleListen(String message){
+    public static void consoleListen(String message) {
         if(message.startsWith("+канал ")){
             CallBackModule.changeChannel(message.substring(7));
             return;
@@ -46,12 +49,15 @@ public class MessageListener {
                msg+="\n"+e.toString();
             }
         }
-        try{
-        parseMessageToPGUI(message.getGuild().block().getName(),Objects.requireNonNull(message.getChannel().ofType(GuildChannel.class).map(GuildChannel::getName).block()),message.getAuthor().get().getUsername(),msg,message.getChannel().block().getId().asString());}catch (Exception e){
-            try{
-            parseMessageToPGUI(message.getGuild().block().getName(),"АнонимуС",message.getAuthor().get().getUsername(),msg,message.getChannel().block().getId().asString());}catch(Exception ignored){}
+        try {
+            parseMessageToPGUI(message.getServer().get().getName(), message.getChannel().asServerTextChannel().get().getName(), message.getAuthor().getName(), msg, message.getChannel().getId() + "");
+        } catch (Exception e) {
+            try {
+                parseMessageToPGUI(message.getServer().get().getName(), message.getChannel().asServerTextChannel().get().getName(), "АнонимуС", msg, message.getChannel().getId() + "");
+            } catch (Exception ignored) {
+            }
         }
-        last=message.getChannel().block().getId().asLong();
+        last = message.getChannel().getId();
     }
     private static void parseMessageToPGUI(String guild,String channel,String author,String text,String channelId){
         ArrayList<String> strings = new ArrayList<>();
