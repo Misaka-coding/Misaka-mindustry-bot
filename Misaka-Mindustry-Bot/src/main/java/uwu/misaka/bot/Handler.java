@@ -29,6 +29,9 @@ public class Handler {
         if (msg.getMessage().getContent().equalsIgnoreCase("ня") || msg.getMessage().getContent().equalsIgnoreCase("nya")) {
             msg.getChannel().sendMessage("ня");
         }
+        if (msg.getMessage().getContent().toLowerCase().contains("яой")) {
+            msg.getChannel().sendMessage("ЯОЙ ФУ");
+        }
     }
 
     public static void handle(MessageCreateEvent msg) {
@@ -59,12 +62,12 @@ public class Handler {
             }
         }
 
-        if (DiscordServerConfig.get(msg.getServerTextChannel().get().getId()).botChannel != 0 &&
-                msg.getChannel().getId() != DiscordServerConfig.get(msg.getChannel().getId()).botChannel) {
+        if (DiscordServerConfig.get(msg.getServer().get().getId()).botChannel != 0 &&
+                msg.getChannel().getId() != DiscordServerConfig.get(msg.getServer().get().getId()).botChannel) {
             return;
         }
         // TODO: 13.07.2021 prefix
-        if (DiscordServerConfig.get(msg.getServerTextChannel().get().getId()).botChannel == 0 && msg.getMessage().getContent().startsWith("+")) {
+        if (msg.getMessage().getContent().startsWith("+") && DiscordServerConfig.get(msg.getServer().get().getId()).botChannel == 0) {
             channel.sendMessage(new EmbedBuilder().setTitle("Бот канал не установлен.")
                     .setFooter("Установите его с помощью команды +канал\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды")
                     .setColor(new Color(255, 0, 0)));
@@ -331,7 +334,7 @@ public class Handler {
 
     public static void setBotChannel(Message msg) {
         if (msg.getAuthor().canCreateChannelsOnServer() ||
-                msg.getAuthor().isBotUser()) {
+                msg.getAuthor().isBotOwner()) {
             DiscordServerConfig.get(msg.getServer().get().getId()).botChannel = msg.getChannel().getId();
             msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Канал успешно установлен.")
                     .setColor(new Color(0, 0, 255)));
@@ -345,7 +348,7 @@ public class Handler {
 
     public static void setMapChannel(Message msg) {
         if (msg.getAuthor().canCreateChannelsOnServer() ||
-                msg.getAuthor().isBotUser()) {
+                msg.getAuthor().isBotOwner()) {
             DiscordServerConfig.get(msg.getServer().get().getId()).mapsChannel = msg.getChannel().getId();
             msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Канал успешно установлен.")
                     .setColor(new Color(0, 0, 255)));
@@ -359,7 +362,7 @@ public class Handler {
 
     public static void setSchematicChannel(Message msg) {
         if (msg.getAuthor().canCreateChannelsOnServer() ||
-                msg.getAuthor().isBotUser()) {
+                msg.getAuthor().isBotOwner()) {
             DiscordServerConfig.get(msg.getServer().get().getId()).schematicsChannel = msg.getChannel().getId();
             msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Канал успешно установлен.")
                     .setColor(new Color(0, 0, 255)));
@@ -373,7 +376,7 @@ public class Handler {
 
     public static void setModsChannel(Message msg) {
         if (msg.getAuthor().canCreateChannelsOnServer() ||
-                msg.getAuthor().isBotUser()) {
+                msg.getAuthor().isBotOwner()) {
             DiscordServerConfig.get(msg.getServer().get().getId()).modsChannel = msg.getChannel().getId();
             msg.getChannel().sendMessage(new EmbedBuilder().setTitle("Канал успешно установлен.")
                     .setColor(new Color(0, 0, 255)));

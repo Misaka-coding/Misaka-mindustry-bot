@@ -1,7 +1,9 @@
 package uwu.misaka.bot.events;
 
 import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.MessageAttachment;
 import org.javacord.api.entity.message.embed.Embed;
+import org.javacord.api.entity.message.embed.EmbedField;
 import org.javacord.api.event.message.MessageCreateEvent;
 import uwu.misaka.bot.CallBackModule;
 import uwu.misaka.bot.Handler;
@@ -15,7 +17,7 @@ public class MessageListener {
     public static final SimpleDateFormat loggerFormat = new SimpleDateFormat("dd.MM.YYYY HH:mm:ss");
 
     public static void listen(MessageCreateEvent message) {
-        if (message.getMessage().getAuthor() == null || message == null) {
+        if (message == null || message.getMessage().getAuthor() == null) {
             return;
         }
         log(message.getMessage());
@@ -31,29 +33,47 @@ public class MessageListener {
     }
 
     public static void consoleListen(String message) {
-        if(message.startsWith("+канал ")){
+        if (message.startsWith("+канал ")) {
             CallBackModule.changeChannel(message.substring(7));
             return;
         }
-        if(message.startsWith("+канал")){
+        if (message.equals("+канал")) {
             CallBackModule.getThis();
             return;
         }
+        if (message.equals("+каналы")) {
+            CallBackModule.getServerChannels();
+            return;
+        }
+        if (message.startsWith("+каналы ")) {
+            CallBackModule.changeChannel(message.substring(8));
+            return;
+        }
+        if (message.equals("+серверы")) {
+            CallBackModule.getServers();
+            return;
+        }
+
         CallBackModule.sendToThis(message);
     }
 
-    public static void log(Message message){
-        String msg = message.getContent();
-        if(message.getEmbeds().size()>0){
-            for(Embed e:message.getEmbeds()){
-               msg+="\n"+e.toString();
+    public static void log(Message message) {
+        StringBuilder msg = new StringBuilder(message.getContent());
+        if (message.getEmbeds().size() > 0) {
+            for (Embed e : message.getEmbeds()) {
+                msg.append("\n" + parseEmbed(e));
+            }
+        }
+        if (message.getAttachments().size() > 0) {
+            for (MessageAttachment a : message.getAttachments()) {
+                msg.append("\n" + a.getFileName() + " " + a.getUrl().toString());
             }
         }
         try {
-            parseMessageToPGUI(message.getServer().get().getName(), message.getChannel().asServerTextChannel().get().getName(), message.getAuthor().getName(), msg, message.getChannel().getId() + "");
+            parseMessageToPGUI(message.getServer().get().getName(), message.getChannel().asServerTextChannel().get().getName(), message.getAuthor().getName(), msg.toString(), message.getChannel().getId() + "");
         } catch (Exception e) {
             try {
-                parseMessageToPGUI(message.getServer().get().getName(), message.getChannel().asServerTextChannel().get().getName(), "АнонимуС", msg, message.getChannel().getId() + "");
+                parseMessageToPGUI(message.getServer().get().getName(), message.getChannel().asServerTextChannel().get().getName(), "АнонимуС", msg.toString(), message.getChannel().getId() + "");
             } catch (Exception ignored) {
             }
         }
@@ -95,14 +115,28 @@ public class MessageListener {
     }
     private static String formatText(String s,int index){
         if(s.length()>index){
-            s=s.substring(0,index-3);
-            s+="...";
-        }
-        else{
-            while(s.length()<index){
-                s+=" ";
+            s = s.substring(0, index - 3);
+            s += "...";
+        } else {
+            while (s.length() < index) {
+                s += " ";
             }
         }
         return s;
+    }
+
+    private static String parseEmbed(Embed e) {
+        StringBuilder out = new StringBuilder("");
+        out.append("|");
+        out.append(">" + e.getTitle() + "\n");
+        out.append(">" + e.getAuthor() + "\n");
+        try {
+            out.append(">" + e.getFooter().get().getText() + "\n");
+        } catch (Exception ignored) {
+        }
+        for (EmbedField f : e.getFields()) {
+            out.append(">" + f.getName() + "=" + f.getValue() + "\n");
+        }
+        return out.toString();
     }
 }
