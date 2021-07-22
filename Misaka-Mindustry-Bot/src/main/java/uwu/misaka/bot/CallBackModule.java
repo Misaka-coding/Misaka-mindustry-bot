@@ -10,8 +10,11 @@ public class CallBackModule {
             lastChannel= MessageListener.last;
         }
         Ohayo.api.getChannelById(lastChannel).get().asTextChannel().get().sendMessage(text);
-    };
-    public static void getThis(){
+    }
+
+    ;
+
+    public static void getThis() {
         try {
             if (lastChannel == 0) {
                 lastChannel = MessageListener.last;
