@@ -26,37 +26,48 @@ import java.util.List;
 
 public class Handler {
     public static void read(MessageCreateEvent msg) {
-        if (msg.getMessage().getContent().equalsIgnoreCase("ня") || msg.getMessage().getContent().equalsIgnoreCase("nya")) {
+        if (
+                Ohayo.nyaChecker.matcher(msg.getMessage().getContent().toLowerCase()).matches()
+                //msg.getMessage().getContent().equalsIgnoreCase("ня") || msg.getMessage().getContent().equalsIgnoreCase("nya")
+        ) {
             msg.getChannel().sendMessage("ня");
         }
         if (msg.getMessage().getContent().toLowerCase().contains("яой")) {
             msg.getChannel().sendMessage("ЯОЙ ФУ");
         }
+        if (msg.getMessage().getContent().equalsIgnoreCase("ичи")) {
+            msg.getChannel().sendMessage("ни");
+        }
+        if (msg.getMessage().getContent().equalsIgnoreCase("ни")) {
+            msg.getChannel().sendMessage("сан");
+        }
+        if (msg.getMessage().getContent().equalsIgnoreCase("сан")) {
+            msg.getChannel().sendMessage("ня");
+        }
     }
 
     public static void handle(MessageCreateEvent msg) {
         TextChannel channel = msg.getChannel();
-        if (msg.getMessage().getContent().startsWith("+канал ")) {
+        if (msg.getMessage().getContent().startsWith("канал ")) {
             String m = msg.getMessage().getContent();
-            if (m.length() < 8) return;
-            switch (m.substring(7)) {
-                case "бот" -> {
+            if (m.length() < 7) return;
+            switch (m.substring(6)) {
+                case "бот" :
                     setBotChannel(msg.getMessage());
                     return;
-                }
-                case "карты" -> {
+                case "карты" :
                     setMapChannel(msg.getMessage());
                     return;
-                }
-                case "схемы" -> {
+
+                case "схемы" :
                     setSchematicChannel(msg.getMessage());
                     return;
-                }
-                case "моды" -> {
+
+                case "моды" :
                     setModsChannel(msg.getMessage());
                     return;
-                }
-                default -> channel.sendMessage(new EmbedBuilder().setTitle("Канал данного типа не поддерживается.")
+
+                default : channel.sendMessage(new EmbedBuilder().setTitle("Канал данного типа не поддерживается.")
                         .setFooter("Доступные каналы:\nбот\nкарты\nсхемы\nмоды", "")
                         .setColor(new Color(255, 0, 0)));
             }
@@ -67,35 +78,35 @@ public class Handler {
             return;
         }
         // TODO: 13.07.2021 prefix
-        if (msg.getMessage().getContent().startsWith("+") && DiscordServerConfig.get(msg.getServer().get().getId()).botChannel == 0) {
+        if (msg.getMessage().getContent().startsWith(Ohayo.prefix) && DiscordServerConfig.get(msg.getServer().get().getId()).botChannel == 0) {
             channel.sendMessage(new EmbedBuilder().setTitle("Бот канал не установлен.")
                     .setFooter("Установите его с помощью команды +канал\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды")
                     .setColor(new Color(255, 0, 0)));
             return;
         }
-        if (msg.getMessage().getContent().equalsIgnoreCase("+помощь") ||
-                msg.getMessage().getContent().equalsIgnoreCase("+памагити") ||
-                msg.getMessage().getContent().equalsIgnoreCase("+хелп") ||
-                msg.getMessage().getContent().equalsIgnoreCase("+help")) {
+        if (msg.getMessage().getContent().equalsIgnoreCase(Ohayo.prefix+"помощь") ||
+                msg.getMessage().getContent().equalsIgnoreCase(Ohayo.prefix+"памагити") ||
+                msg.getMessage().getContent().equalsIgnoreCase(Ohayo.prefix+"хелп") ||
+                msg.getMessage().getContent().equalsIgnoreCase(Ohayo.prefix+"help")) {
             channel.sendMessage(new EmbedBuilder()
                     .setColor(new Color(0, 255, 0))
-                    .addField("+канал <тип канала>", "установка каналов для контента. если канал не установлен, вывод в бот канал\nДоступно для: \nРоль с правами на управление каналами\nАдминистраторы бота(только бот канал)", false)
-                    .addField("+помощь", "помощь", false)
+                    .addField(Ohayo.prefix+"канал <тип канала>", "установка каналов для контента. если канал не установлен, вывод в бот канал\nДоступно для: \nРоль с правами на управление каналами\nАдминистраторы бота(только бот канал)", false)
+                    .addField(Ohayo.prefix+"помощь", "помощь", false)
                     .addField("Преобразование контента", "Моды, плагины, карты, схемы преобразуются при отправке их в бот канал. Если канал типа контента существует, отправка туда, инначе в бот канал", false)
-                    .addField("+ава <упоменание/айди>", "Совлерские фокусы с аватарками", false)
-                    .addField("+хентай", "Совлерские фокусы с хентаем | Только для администраторов сервера и администраторов бота | только в каналах с меткой nsfw | не работает", false)
+                    .addField(Ohayo.prefix+"ава <упоменание/айди>", "Совлерские фокусы с аватарками", false)
+                    .addField(Ohayo.prefix+"хентай", "Совлерские фокусы с хентаем | Только для администраторов сервера и администраторов бота | только в каналах с меткой nsfw | не работает", false)
             )
             ;
             return;
         }
-        if (msg.getMessage().getContent().startsWith("+ава")) {
+        if (msg.getMessage().getContent().startsWith(Ohayo.prefix+"ава")) {
             if (msg.getMessage().getMentionedUsers().size() > 0) {
                 channel.sendMessage(msg.getMessage().getMentionedUsers().get(0).getAvatar().getUrl().toString());
                 return;
             } else {
                 try {
-                    if (msg.getMessage().getContent().length() > 5) {
-                        channel.sendMessage(Ohayo.api.getUserById(Long.parseLong(msg.getMessage().getContent().substring(5))).get().getAvatar().getUrl().toString());
+                    if (msg.getMessage().getContent().length() > Ohayo.prefix.length()+ 4) {
+                        channel.sendMessage(Ohayo.api.getUserById(Long.parseLong(msg.getMessage().getContent().substring(Ohayo.prefix.length()+ 4))).get().getAvatar().getUrl().toString());
                         return;
                     }
                 } catch (Exception e) {
@@ -116,7 +127,7 @@ public class Handler {
         if (a.getFileName().endsWith(".msch")) {
             if (DiscordServerConfig.get(msg.getServer().get().getId()).botChannel == 0) {
                 channel.sendMessage(new EmbedBuilder().setTitle("Бот канал не установлен.")
-                        .setFooter("Установите его с помощью команды +канал\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды")
+                        .setFooter("Установите его с помощью команды '"+Ohayo.prefix+"канал'\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды")
                         .setColor(new Color(255, 0, 0)));
                 return;
             }
@@ -126,7 +137,7 @@ public class Handler {
         if (a.getFileName().endsWith(".zip") || a.getFileName().endsWith(".jar")) {
             if (DiscordServerConfig.get(msg.getServer().get().getId()).botChannel == 0) {
                 channel.sendMessage(new EmbedBuilder().setTitle("Бот канал не установлен.")
-                        .setFooter("Установите его с помощью команды +канал\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды")
+                        .setFooter("Установите его с помощью команды '"+Ohayo.prefix+"канал'\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды")
                         .setColor(new Color(255, 0, 0)));
                 return;
             }
@@ -136,7 +147,7 @@ public class Handler {
         if (a.getFileName().endsWith(".msav")) {
             if (DiscordServerConfig.get(msg.getServer().get().getId()).botChannel == 0) {
                 channel.sendMessage(new EmbedBuilder().setTitle("Бот канал не установлен.")
-                        .setFooter("Установите его с помощью команды +канал\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды")
+                        .setFooter("Установите его с помощью команды '"+Ohayo.prefix+"канал'\nдоступные каналы:\nбот\nкарты\nсхемы\nмоды")
                         .setColor(new Color(255, 0, 0)));
                 return;
             }
