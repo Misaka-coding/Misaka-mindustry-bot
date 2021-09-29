@@ -17,7 +17,7 @@ public class Ohayo {
     public static Long botBaseServer = 826541082534871061L;
     public static DiscordApi api;
     public static String prefix = "ня ";
-    public static Pattern nyaChecker = Pattern.compile("^(?iu)(\\p{Punct}|\\s|[нn]+я+|[nн]+y+a+)+$");
+    public static Pattern nyaChecker = Pattern.compile("^(?iu)[\\p{Punct}\\s]*([нn]+я+|[nн]+[yу]+a+)+[\\p{Punct}\\s]*$");
 
     public static void main(String[] args) throws IOException {
         api = new DiscordApiBuilder().setToken(args[0]).login().join();
